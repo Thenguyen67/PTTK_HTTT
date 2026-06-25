@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <title>eMarket</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c7c7cc; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a0a0a5; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen overflow-hidden font-sans select-none text-gray-800">
+
+    <div id="loginScreen" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-[100]">
+        <div class="bg-white p-8 md:p-10 rounded-2xl shadow-2xl max-w-md w-full w-[90%] text-center">
+            <div class="mb-8 flex flex-col items-center">
+                <div class="bg-indigo-100 p-4 rounded-full mb-4 shadow-sm border border-indigo-200">
+                    <i data-lucide="lock" class="w-8 h-8 text-indigo-700"></i>
+                </div>
+                <h2 class="text-3xl font-black text-gray-800 tracking-wide">Xác Thực</h2>
+                <p class="text-gray-500 mt-2 font-medium">Vui lòng nhập mã PIN 6 số của nhân viên</p>
+            </div>
+            
+            <form id="pinForm" class="space-y-6">
+                <div class="flex justify-center gap-2 sm:gap-3" id="pinContainer">
+                    <input type="password" class="pin-input w-10 h-12 sm:w-12 sm:h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" maxlength="1" inputmode="numeric" required autofocus>
+                    <input type="password" class="pin-input w-10 h-12 sm:w-12 sm:h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" maxlength="1" inputmode="numeric" required>
+                    <input type="password" class="pin-input w-10 h-12 sm:w-12 sm:h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" maxlength="1" inputmode="numeric" required>
+                    <input type="password" class="pin-input w-10 h-12 sm:w-12 sm:h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" maxlength="1" inputmode="numeric" required>
+                    <input type="password" class="pin-input w-10 h-12 sm:w-12 sm:h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" maxlength="1" inputmode="numeric" required>
+                    <input type="password" class="pin-input w-10 h-12 sm:w-12 sm:h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" maxlength="1" inputmode="numeric" required>
+                </div>
+                
+                <p id="pinError" class="text-red-500 text-sm hidden font-medium flex items-center justify-center gap-1">
+                    <i data-lucide="alert-circle" class="w-4 h-4"></i> Mã PIN không chính xác
+                </p>
+                
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 text-lg">
+                    <span>Đăng Nhập</span>
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="posApp" class="hidden w-full h-full">
+        <aside class="w-64 bg-indigo-900 text-white flex flex-col shadow-xl z-20 flex-shrink-0">
+            <div class="h-16 flex items-center justify-center border-b border-indigo-800 px-4">
+                <div class="flex items-center gap-3 w-full">
+                    <div class="bg-white text-indigo-700 p-1.5 rounded-lg shadow-sm flex items-center justify-center">
+                        <i data-lucide="store" class="w-6 h-6"></i>
+                    </div>
+                    <h1 class="text-xl font-black tracking-wider text-white">eMarket</h1>
+                    <span class="bg-indigo-700 px-1.5 py-0.5 rounded text-[10px] border border-indigo-500 shadow-inner font-semibold ml-auto">POS</span>
+                </div>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto py-4 space-y-2 px-3">
+                <button onclick="switchTab('view-pos')" id="tab-pos" class="sidebar-tab w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-indigo-700 border-l-4 border-white transition-all font-medium text-left">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span class="flex-1">Bán hàng</span>
+                    <span class="text-xs opacity-60">F1</span>
+                </button>
+                <button onclick="switchTab('view-return')" id="tab-return" class="sidebar-tab w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-indigo-800 border-l-4 border-transparent transition-all font-medium text-left text-indigo-100">
+                    <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                    <span class="flex-1">Đổi / Trả hàng</span>
+                    <span class="text-xs opacity-60">F2</span>
+                </button>
+                <button onclick="switchTab('view-lookup')" id="tab-lookup" class="sidebar-tab w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-indigo-800 border-l-4 border-transparent transition-all font-medium text-left text-indigo-100">
+                    <i data-lucide="package-search" class="w-5 h-5"></i>
+                    <span class="flex-1">Tra cứu SP</span>
+                    <span class="text-xs opacity-60">F3</span>
+                </button>
+                <button onclick="switchTab('view-history')" id="tab-history" class="sidebar-tab w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-indigo-800 border-l-4 border-transparent transition-all font-medium text-left text-indigo-100">
+                    <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+                    <span class="flex-1">Lịch sử HĐ</span>
+                    <span class="text-xs opacity-60">F4</span>
+                </button>
+                <button onclick="switchTab('view-report')" id="tab-report" class="sidebar-tab w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-indigo-800 border-l-4 border-transparent transition-all font-medium text-left text-indigo-100">
+                    <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                    <span class="flex-1">Báo cáo ca</span>
+                    <span class="text-xs opacity-60">F5</span>
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-indigo-800 text-sm flex flex-col gap-2">
+                <div class="flex items-center gap-2 text-indigo-200">
+                    <i data-lucide="user" class="w-4 h-4"></i> Thu ngân: <span class="font-bold text-white">Nguyễn Thế Anh</span>
+                </div>
+                <div class="flex items-center gap-2 text-indigo-200">
+                    <i data-lucide="clock" class="w-4 h-4"></i> <span id="clock">--:--:--</span>
+                </div>
+                <button onclick="handleLogout()" class="mt-2 text-indigo-300 hover:text-white flex items-center gap-2 transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Khóa màn hình
+                </button>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col overflow-hidden relative bg-gray-100">
+            
+            <main id="view-pos" class="tab-content flex-1 flex overflow-hidden">
+                <section class="flex-1 flex flex-col p-4 gap-4">
+                    <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200 flex gap-2">
+                        <div class="relative flex-1">
+                            <i data-lucide="barcode" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="barcodeInput" placeholder="Nhập SL*Mã (VD: 5*SP01) hoặc Mã SP rồi ấn Enter..." 
+                                oninput="this.value = this.value.toUpperCase()"
+                                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-lg transition-all" autocomplete="off">
+                        </div>
+                        <button onclick="handleSearchClick()" class="bg-indigo-100 text-indigo-700 px-6 rounded-md font-semibold hover:bg-indigo-200 transition-colors flex items-center gap-2">
+                            <i data-lucide="search" class="w-5 h-5"></i> Thêm
+                        </button>
+                    </div>
+
+                    <div class="bg-white flex-1 rounded-lg shadow-sm border border-gray-200 flex flex-col overflow-hidden">
+                        <div class="bg-gray-100 border-b border-gray-200 grid grid-cols-12 gap-2 p-3 font-semibold text-gray-700 text-sm text-center">
+                            <div class="col-span-1">STT</div>
+                            <div class="col-span-1">Mã</div>
+                            <div class="col-span-4 text-left">Tên sản phẩm</div>
+                            <div class="col-span-2">Đơn giá</div>
+                            <div class="col-span-2">Số lượng</div>
+                            <div class="col-span-2">Thành tiền</div>
+                        </div>
+                        
+                        <div id="cartContainer" class="flex-1 overflow-y-auto p-2 space-y-2 scroll-smooth"></div>
+                    </div>
+                </section>
+
+                <section class="w-96 bg-white border-l border-gray-200 flex flex-col shadow-[-4px_0_15px_rgba(0,0,0,0.05)] flex-shrink-0 z-10 overflow-hidden">
+                    <div class="p-5 border-b border-gray-100 bg-gray-50 shrink-0">
+                        <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Khách hàng / Thẻ thành viên</h2>
+                        
+                        <div id="memberInputSection" class="flex gap-2">
+                            <div class="relative flex-1">
+                                <i data-lucide="credit-card" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" id="memberInput" placeholder="Nhập mã thẻ..." oninput="this.value = this.value.toUpperCase()" class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-indigo-500 text-sm">
+                            </div>
+                            <button onclick="applyMember()" class="bg-gray-800 text-white px-4 rounded hover:bg-gray-700 text-sm font-medium">Áp dụng</button>
+                        </div>
+
+                        <div id="memberInfoSection" class="hidden mt-3 bg-indigo-50 border border-indigo-100 rounded-lg p-3 relative">
+                            <button onclick="removeMember()" class="absolute top-2 right-2 text-gray-400 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-indigo-900 text-lg" id="memberName">Nguyễn Văn A</span>
+                                <span class="px-2 py-0.5 rounded text-xs font-bold text-white bg-gradient-to-r" id="memberRankBadge">VIP</span>
+                            </div>
+                            <div class="text-sm text-indigo-700 mb-2">Chiết khấu hạng thẻ: <span class="font-bold" id="memberDiscount">10%</span></div>
+                            
+                            <div class="border-t border-indigo-200 pt-2 mt-2 flex justify-between items-center">
+                                <div>
+                                    <div class="text-xs text-gray-500">Điểm khả dụng</div>
+                                    <div class="font-bold text-orange-600"><span id="memberPoints">500</span> điểm</div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-gray-500">Tự động trừ:</span>
+                                    <input type="number" id="usePointsInput" value="0" readonly class="w-16 border border-gray-300 rounded px-1 py-1 text-right text-sm bg-gray-100 text-gray-500 cursor-not-allowed outline-none">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-5 flex-1 flex flex-col overflow-y-auto">
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-gray-600">
+                                <span>Tổng tiền hàng (<span id="totalItems">0</span> món)</span>
+                                <span class="font-medium" id="subTotal">0 đ</span>
+                            </div>
+                            <div class="flex justify-between text-green-600">
+                                <span>Chiết khấu hạng thẻ</span>
+                                <span class="font-medium" id="discountAmount">- 0 đ</span>
+                            </div>
+                            <div class="flex justify-between text-orange-600">
+                                <span>Trừ điểm tích lũy</span>
+                                <span class="font-medium" id="pointDiscountAmount">- 0 đ</span>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t-2 border-dashed border-gray-200 my-4 mt-auto"></div>
+                        
+                        <div class="flex justify-between items-end mb-2">
+                            <span class="text-lg font-bold text-gray-800">KHÁCH PHẢI TRẢ</span>
+                            <span class="text-4xl font-black text-indigo-700" id="finalTotal">0 đ</span>
+                        </div>
+                        <div class="text-right text-sm text-green-600 hidden" id="earnedPointsDiv">
+                            + <span id="earnedPoints">0</span> điểm thưởng mới
+                        </div>
+                    </div>
+
+                    <div class="p-5 border-t border-gray-200 bg-gray-50 shrink-0">
+                        <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Phương thức thanh toán</h2>
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                            <button onclick="setPayment('CASH')" id="btnCASH" class="payment-btn border-2 border-indigo-500 bg-indigo-50 text-indigo-700 py-2 rounded-lg font-medium flex flex-col items-center gap-1 transition-all">
+                                <i data-lucide="banknote" class="w-5 h-5"></i> Tiền mặt
+                            </button>
+                            <button onclick="setPayment('QR')" id="btnQR" class="payment-btn border-2 border-gray-200 bg-white text-gray-600 hover:bg-gray-50 py-2 rounded-lg font-medium flex flex-col items-center gap-1 transition-all">
+                                <i data-lucide="qr-code" class="w-5 h-5"></i> QR Code
+                            </button>
+                        </div>
+                            <div id="qrContainer" class="hidden flex flex-col items-center justify-center mb-4 p-4 bg-white border-2 border-indigo-200 rounded-lg shadow-sm">
+                                <p class="text-sm font-bold text-indigo-700 mb-2">Quét mã để thanh toán</p>
+                                <div id="qrcode"></div>
+                            </div>
+
+                            <button onclick="handleCheckout()" class="w-full bg-green-600 hover:bg-green-700 text-white text-xl font-bold py-4 rounded-lg shadow-lg flex justify-center items-center gap-2 transition-transform transform active:scale-95">
+                                <i data-lucide="printer" class="w-6 h-6"></i> HOÀN TẤT (Enter)
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <main id="view-return" class="tab-content hidden w-full h-full p-6 overflow-y-auto">
+                <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col min-h-full">
+                    <div class="flex justify-between items-center mb-6 border-b pb-4 shrink-0">
+                        <h3 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                            <div class="bg-red-100 p-2 rounded-lg"><i data-lucide="rotate-ccw" class="text-red-600 w-6 h-6"></i></div>
+                            Xử lý Đổi/Trả hàng
+                        </h3>
+                    </div>
+                    
+                    <div class="flex gap-2 mb-6 shrink-0">
+                        <div class="relative flex-1">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="returnInvoiceInput" oninput="this.value = this.value.toUpperCase()" placeholder="Nhập Mã hóa đơn gốc (VD: HD123456)..." class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-lg transition-all" autocomplete="off">
+                        </div>
+                        <button onclick="searchInvoiceForReturn()" class="bg-red-600 hover:bg-red-700 text-white px-6 rounded-lg font-bold transition-colors flex items-center gap-2 shadow-sm">
+                            Tìm kiếm HĐ
+                        </button>
+                    </div>
+
+                    <div id="returnInvoiceResult" class="hidden flex-col flex-1">
+                        <div class="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4 shrink-0">
+                            <div>
+                                <div class="text-sm text-gray-500">Mã Hóa Đơn: <span class="font-bold text-gray-800 text-base" id="retInvId">---</span></div>
+                                <div class="text-sm text-gray-500">Thời gian: <span class="font-bold text-gray-800" id="retInvTime">---</span></div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-gray-500">Khách hàng: <span class="font-bold text-indigo-700" id="retInvMember">---</span></div>
+                                <div class="text-sm text-gray-500">Tổng thu gốc: <span class="font-bold text-green-600" id="retInvTotal">0 đ</span></div>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 bg-gray-50 rounded-lg border border-gray-200 p-2 mb-4 space-y-2" id="returnItemsContainer"></div>
+
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-5 shrink-0 flex justify-between items-center shadow-inner mt-auto">
+                            <div>
+                                <div class="text-sm text-red-600 font-bold mb-1 tracking-wide uppercase">Tổng tiền hoàn lại cho khách:</div>
+                                <div class="text-4xl font-black text-red-700" id="retRefundTotal">0 đ</div>
+                                <div class="text-sm font-semibold text-orange-600 mt-2 flex items-center gap-1" id="retPointsRevokeMsg">
+                                    <i data-lucide="alert-circle" class="w-4 h-4"></i> Thu hồi: 0 điểm thưởng
+                                </div>
+                            </div>
+                            <button onclick="processReturn()" class="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-bold text-lg shadow-lg flex items-center gap-2 transition-transform transform active:scale-95 border-2 border-red-700">
+                                <i data-lucide="check-circle" class="w-6 h-6"></i> XÁC NHẬN TRẢ HÀNG
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="returnEmptyState" class="bg-gray-50 border border-gray-200 rounded-xl p-10 flex flex-col items-center justify-center text-gray-400 flex-1">
+                        <i data-lucide="receipt" class="w-16 h-16 mb-4 opacity-50"></i>
+                        <p class="text-lg font-medium text-gray-500">Nhập mã hóa đơn để xem chi tiết và xử lý trả hàng</p>
+                        <p class="text-sm mt-2">Hệ thống sẽ đối soát giá mua thực tế và thu hồi điểm thưởng.</p>
+                    </div>
+                </div>
+            </main>
+
+            <main id="view-lookup" class="tab-content hidden w-full h-full p-6 overflow-y-auto">
+                <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex justify-between items-center mb-6 border-b pb-4">
+                        <h3 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                            <div class="bg-blue-100 p-2 rounded-lg"><i data-lucide="package-search" class="text-blue-600 w-6 h-6"></i></div>
+                            Tra cứu thông tin sản phẩm
+                        </h3>
+                    </div>
+                    
+                    <div class="flex gap-2 mb-6">
+                        <div class="relative flex-1">
+                            <i data-lucide="barcode" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="lookupInput" oninput="this.value = this.value.toUpperCase()" placeholder="Nhập mã sản phẩm (VD: SP01, SP15)..." class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all" autocomplete="off">
+                        </div>
+                        <button onclick="searchProductInfo()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-lg font-bold transition-colors flex items-center gap-2 shadow-sm">
+                            <i data-lucide="search" class="w-5 h-5"></i> Tìm kiếm
+                        </button>
+                    </div>
+
+                    <div id="lookupResult" class="hidden bg-gray-50 border border-gray-200 rounded-xl p-6 gap-6">
+                        <div class="w-32 h-32 bg-white border border-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm relative overflow-hidden">
+                            <i data-lucide="image" class="w-12 h-12 text-gray-300"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm text-gray-500 font-mono mb-1 bg-gray-200 inline-block px-2 rounded" id="lookupId">Mã: ---</div>
+                            <h4 class="text-2xl font-bold text-gray-800 mb-4" id="lookupName">Tên sản phẩm</h4>
+                            <div class="grid grid-cols-2 gap-4 bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+                                <div>
+                                    <div class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Giá niêm yết</div>
+                                    <div class="text-xl font-bold text-indigo-700" id="lookupPrice">0 đ</div>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Tồn kho hiện tại</div>
+                                    <div class="text-xl font-bold text-green-600 flex items-center gap-1">
+                                        <i data-lucide="box" class="w-5 h-5"></i>
+                                        <span id="lookupStock">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="lookupEmpty" class="bg-gray-50 border border-gray-200 rounded-xl p-10 flex flex-col items-center justify-center text-gray-400">
+                        <i data-lucide="box" class="w-16 h-16 mb-4 opacity-50"></i>
+                        <p class="text-lg font-medium text-gray-500">Nhập mã hoặc quét mã vạch để xem chi tiết</p>
+                    </div>
+                </div>
+            </main>
+
+            <main id="view-history" class="tab-content hidden w-full h-full p-6 overflow-y-auto">
+                <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col min-h-full">
+                    <div class="p-6 border-b border-gray-200 shrink-0">
+                        <h3 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                            <div class="bg-indigo-100 p-2 rounded-lg"><i data-lucide="clipboard-list" class="text-indigo-600 w-6 h-6"></i></div>
+                            Lịch sử giao dịch trong ca
+                        </h3>
+                    </div>
+                    
+                    <div class="flex-1 p-0 overflow-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead class="bg-gray-50 text-gray-700 font-semibold sticky top-0 border-b border-gray-200">
+                                <tr>
+                                    <th class="p-4">Mã Hóa Đơn</th>
+                                    <th class="p-4">Thời Gian</th>
+                                    <th class="p-4">Khách Hàng</th>
+                                    <th class="p-4">Loại GD</th>
+                                    <th class="p-4">Thanh Toán</th>
+                                    <th class="p-4 text-right">Tổng Tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyContainer" class="divide-y divide-gray-100">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
+            <main id="view-report" class="tab-content hidden w-full h-full p-6 overflow-y-auto">
+                <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex justify-between items-center mb-6 border-b pb-4">
+                        <h3 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                            <div class="bg-green-100 p-2 rounded-lg"><i data-lucide="pie-chart" class="text-green-600 w-6 h-6"></i></div>
+                            Báo cáo Doanh thu trong Ca
+                        </h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="bg-gradient-to-br from-indigo-50 to-blue-50 p-5 rounded-xl border border-indigo-100 shadow-sm flex items-center gap-4">
+                            <div class="bg-indigo-500 p-3 rounded-full text-white"><i data-lucide="receipt" class="w-8 h-8"></i></div>
+                            <div>
+                                <div class="text-indigo-600 text-sm font-bold uppercase tracking-wider mb-1">Tổng giao dịch</div>
+                                <div class="text-3xl font-black text-indigo-900" id="statTotalOrders">0</div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-xl border border-green-100 shadow-sm flex items-center gap-4">
+                            <div class="bg-green-500 p-3 rounded-full text-white"><i data-lucide="wallet" class="w-8 h-8"></i></div>
+                            <div>
+                                <div class="text-green-600 text-sm font-bold uppercase tracking-wider mb-1">Tổng doanh thu ca</div>
+                                <div class="text-3xl font-black text-green-900" id="statTotalRevenue">0 đ</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-full h-96 bg-gray-50 border border-gray-200 rounded-xl p-4">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-[150]">
+        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full transform scale-95 transition-transform duration-300" id="modalContent">
+            <div id="modalIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                <i data-lucide="check" class="h-6 w-6 text-green-600" id="modalIconInner"></i>
+            </div>
+            <h3 class="text-lg leading-6 font-bold text-gray-900 text-center" id="modalTitle">Thành công</h3>
+            <div class="mt-2">
+                <p class="text-sm text-gray-600 text-center whitespace-pre-line" id="modalMessage">Giao dịch hoàn tất.</p>
+            </div>
+            <div class="mt-6 text-center">
+                <button onclick="closeModal()" class="bg-indigo-600 text-white px-8 py-2 rounded-lg font-bold hover:bg-indigo-700 focus:outline-none shadow text-lg w-full">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const pinInputs = document.querySelectorAll('.pin-input');
+        const pinForm = document.getElementById('pinForm');
+        const loginScreen = document.getElementById('loginScreen');
+        const posApp = document.getElementById('posApp');
+        const pinError = document.getElementById('pinError');
+        let isLoggedIn = false;
+
+        pinInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                let val = e.target.value.replace(/[^0-9]/g, '');
+                if (val.length > 0) {
+                    e.target.value = val.slice(-1); 
+                    if (index < pinInputs.length - 1) {
+                        setTimeout(() => {
+                            pinInputs[index + 1].focus();
+                        }, 10);
+                    }
+                } else {
+                    e.target.value = '';
+                }
+                pinError.classList.add('hidden');
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                    setTimeout(() => {
+                        pinInputs[index - 1].focus();
+                    }, 10);
+                }
+            });
+        });
+
+        pinForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            let pin = '';
+            pinInputs.forEach(input => pin += input.value);
+            
+            if (pin === '123456') {
+                loginScreen.classList.add('hidden');
+                posApp.classList.remove('hidden');
+                posApp.classList.add('flex');
+                isLoggedIn = true;
+                
+                setTimeout(() => {
+                    lucide.createIcons();
+                    document.getElementById('barcodeInput').focus();
+                }, 100);
+            } else {
+                pinError.classList.remove('hidden');
+                pinInputs.forEach(input => input.value = '');
+                pinInputs[0].focus();
+            }
+        });
+
+        const handleLogout = () => {
+            isLoggedIn = false;
+            posApp.classList.add('hidden');
+            posApp.classList.remove('flex');
+            loginScreen.classList.remove('hidden');
+            pinInputs.forEach(input => input.value = '');
+            pinInputs[0].focus();
+            switchTab('view-pos'); 
+        }
+
+        const POINT_VALUE = 1000; 
+        const POINT_EARN_RATE = 10000; 
+
+        let cart = [];
+        let currentMember = null;
+        let paymentMethod = 'CASH';
+        let currentFinalTotal = 0; 
+        let sessionOrders = [];
+        let revenueChartInstance = null; 
+        let currentReturnOrder = null; 
+
+        const formatMoney = (amount) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+
+        const copyToClipboard = (text) => {
+            navigator.clipboard.writeText(text).then(() => {
+                showModal('Thành công', `Đã sao chép mã hóa đơn:\n${text}`);
+            }).catch(err => {
+                showModal('Lỗi', 'Không thể sao chép mã.', true);
+            });
+        };
+
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('vi-VN') + ' - ' + now.toLocaleDateString('vi-VN');
+        }, 1000);
+
+        const switchTab = (tabId) => {
+            if(!isLoggedIn) return;
+
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('flex');
+            });
+            
+            const target = document.getElementById(tabId);
+            target.classList.remove('hidden');
+            if(tabId === 'view-pos') target.classList.add('flex');
+
+            document.querySelectorAll('.sidebar-tab').forEach(el => {
+                el.classList.remove('bg-indigo-700', 'border-white', 'text-white');
+                el.classList.add('hover:bg-indigo-800', 'border-transparent', 'text-indigo-100');
+            });
+            const activeBtn = document.querySelector(`[onclick="switchTab('${tabId}')"]`);
+            if(activeBtn) {
+                activeBtn.classList.add('bg-indigo-700', 'border-white', 'text-white');
+                activeBtn.classList.remove('hover:bg-indigo-800', 'border-transparent', 'text-indigo-100');
+            }
+
+            if (tabId === 'view-report') renderRevenueChartData();
+            if (tabId === 'view-history') renderHistoryData();
+            if (tabId === 'view-pos') setTimeout(() => document.getElementById('barcodeInput').focus(), 100);
+            if (tabId === 'view-lookup') setTimeout(() => document.getElementById('lookupInput').focus(), 100);
+            if (tabId === 'view-return') setTimeout(() => document.getElementById('returnInvoiceInput').focus(), 100);
+        };
+
+        window.addEventListener('keydown', function(e) {
+            if(!isLoggedIn) return; 
+            if (e.key === 'F1') { e.preventDefault(); switchTab('view-pos'); }
+            else if (e.key === 'F2') { e.preventDefault(); switchTab('view-return'); }
+            else if (e.key === 'F3') { e.preventDefault(); switchTab('view-lookup'); }
+            else if (e.key === 'F4') { e.preventDefault(); switchTab('view-history'); }
+            else if (e.key === 'F5') { e.preventDefault(); switchTab('view-report'); }
+        });
+
+        const showModal = (title, message, isError = false) => {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = message;
+            
+            const iconBg = document.getElementById('modalIcon');
+            const icon = document.getElementById('modalIconInner');
+            if (isError) {
+                iconBg.className = 'mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4';
+                icon.setAttribute('data-lucide', 'alert-triangle');
+                icon.className = 'h-8 w-8 text-red-600';
+            } else {
+                iconBg.className = 'mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4';
+                icon.setAttribute('data-lucide', 'check');
+                icon.className = 'h-8 w-8 text-green-600';
+            }
+            lucide.createIcons();
+            
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => content.classList.remove('scale-95'), 10);
+        };
+
+        const closeModal = () => {
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modalContent');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 200);
+        };
+
+        const updateQty = (index, newQty) => {
+            const qty = parseInt(newQty);
+            if (isNaN(qty) || qty < 1) cart[index].qty = 1;
+            else if (qty > cart[index].stock) { showModal('Hết hàng', `Chỉ còn ${cart[index].stock}.`, true); cart[index].qty = cart[index].stock; }
+            else cart[index].qty = qty;
+            renderCart(); calculateTotal();
+        };
+
+        const removeFromCart = (index) => { cart.splice(index, 1); renderCart(); calculateTotal(); };
+
+        const applyMember = () => {
+            const code = document.getElementById('memberInput').value.trim().toUpperCase();
+            const member = dbMembers[code];
+            if (!member) return showModal('Lỗi', 'Không tìm thấy thẻ.', true);
+            currentMember = member;
+            document.getElementById('memberInputSection').classList.add('hidden');
+            document.getElementById('memberInfoSection').classList.remove('hidden');
+            document.getElementById('memberName').innerText = member.name;
+            document.getElementById('memberRankBadge').innerText = member.rank;
+            document.getElementById('memberRankBadge').className = `px-2 py-0.5 rounded text-xs font-bold text-white bg-gradient-to-r ${member.color}`;
+            document.getElementById('memberDiscount').innerText = (member.discountRate * 100) + '%';
+            document.getElementById('memberPoints').innerText = member.points;
+            calculateTotal();
+        };
+
+        const removeMember = () => {
+            currentMember = null;
+            document.getElementById('memberInputSection').classList.remove('hidden');
+            document.getElementById('memberInfoSection').classList.add('hidden');
+            document.getElementById('memberInput').value = '';
+            document.getElementById('usePointsInput').value = 0;
+            calculateTotal();
+        };
+
+        const calculateTotal = () => {
+            let subTotal = 0, totalItems = 0;
+            cart.forEach(item => { subTotal += (item.price * item.qty); totalItems += item.qty; });
+            let discountAmount = 0, pointDiscountAmount = 0;
+
+            if (currentMember) {
+                discountAmount = subTotal * currentMember.discountRate;
+                const tempTotal = subTotal - discountAmount;
+                let maxPointsForBill = Math.floor(tempTotal / POINT_VALUE);
+                let pointsToUse = Math.min(currentMember.points, maxPointsForBill);
+                document.getElementById('usePointsInput').value = pointsToUse;
+                pointDiscountAmount = pointsToUse * POINT_VALUE;
+            } else {
+                document.getElementById('usePointsInput').value = 0;
+            }
+
+            currentFinalTotal = subTotal - discountAmount - pointDiscountAmount;
+            
+            let earnedPoints = 0;
+            const earnedPointsDiv = document.getElementById('earnedPointsDiv');
+            if (currentMember && currentFinalTotal > 0) {
+                earnedPoints = Math.floor(currentFinalTotal / POINT_EARN_RATE);
+                document.getElementById('earnedPoints').innerText = earnedPoints;
+                earnedPointsDiv.classList.remove('hidden');
+            } else earnedPointsDiv.classList.add('hidden');
+
+            document.getElementById('totalItems').innerText = totalItems;
+            document.getElementById('subTotal').innerText = formatMoney(subTotal);
+            document.getElementById('discountAmount').innerText = '- ' + formatMoney(discountAmount);
+            document.getElementById('pointDiscountAmount').innerText = '- ' + formatMoney(pointDiscountAmount);
+            document.getElementById('finalTotal').innerText = formatMoney(currentFinalTotal);
+
+            if (paymentMethod === 'QR') {
+                generatePaymentQR();
+            }
+        };
+
+        const handleCheckout = async () => {
+            if (cart.length === 0) return showModal('Trống', 'Vui lòng quét mặt hàng.', true);
+            
+            const invoiceId = 'HD' + Date.now().toString().slice(-6);
+            const timeString = new Date().toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            
+            const subTotalVal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const payRatio = subTotalVal > 0 ? (currentFinalTotal / subTotalVal) : 1;
+            
+            const savedItems = cart.map(item => ({ 
+                ...item, 
+                effectivePrice: Math.round(item.price * payRatio), 
+                returnedQty: 0 
+            }));
+
+            let pointMsg = "";
+
+            if (currentMember) {
+                const pointsUsed = parseInt(document.getElementById('usePointsInput').value) || 0;
+                const earnedPoints = parseInt(document.getElementById('earnedPoints').innerText) || 0;
+                pointMsg = `\nTrừ: ${pointsUsed} điểm.\nTích thêm: ${earnedPoints} điểm.`;
+
+                try {
+                    const response = await fetch('http://localhost:3000/api/members/update-points', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            memberCode: currentMember.id,
+                            pointsUsed: pointsUsed,
+                            pointsEarned: earnedPoints
+                        })
+                    });
+
+                    const result = await response.json();
+                    if (!result.success) {
+                        return showModal('Lỗi', result.message || 'Không thể cập nhật điểm trên hệ thống.', true);
+                    }
+                    currentMember.points = result.newTotalPoints; 
+                } catch (error) {
+                    return showModal('Lỗi kết nối', 'Không thể kết nối đến máy chủ CSDL. Hủy thanh toán.', true);
+                }
+            }
+
+            sessionOrders.push({
+                id: invoiceId, total: currentFinalTotal, time: timeString, items: savedItems,
+                memberId: currentMember ? currentMember.id : null,
+                memberName: currentMember ? currentMember.name : "Khách vãng lai", 
+                isReturn: false,
+                payment: paymentMethod 
+            });
+            const paymentText = paymentMethod === 'CASH' ? 'Tiền mặt' : 'QR Code';
+            showModal('Thành công', `Hóa đơn: ${invoiceId}\nTổng: ${formatMoney(currentFinalTotal)}\nThanh toán: ${paymentText}${pointMsg}`);
+            
+            cart = []; 
+            lastQrAmount = -1;
+            removeMember(); 
+            renderCart(); 
+            setPayment('CASH');
+        };
+
+        const renderCart = () => {
+            const container = document.getElementById('cartContainer');
+            if (cart.length === 0) {
+                container.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-gray-400">
+                    <i data-lucide="shopping-basket" class="w-16 h-16 mb-4 opacity-50"></i><p>Giỏ hàng trống.</p></div>`;
+                lucide.createIcons(); return;
+            }
+            container.innerHTML = cart.map((item, index) => `
+                <div class="bg-white border border-gray-100 rounded p-2 flex items-center grid grid-cols-12 gap-2 text-sm shadow-sm hover:shadow">
+                    <div class="col-span-1 text-center text-gray-500 font-medium">${index + 1}</div>
+                    <div class="col-span-1 text-center font-mono text-gray-400 text-xs">${item.id}</div>
+                    <div class="col-span-4 font-semibold text-gray-800 line-clamp-1">${item.name}</div>
+                    <div class="col-span-2 text-gray-600">${formatMoney(item.price)}</div>
+                    <div class="col-span-2 flex justify-center">
+                        <div class="flex items-center border border-gray-300 rounded overflow-hidden">
+                            <button onclick="updateQty(${index}, ${item.qty - 1})" class="px-2 bg-gray-50 hover:bg-gray-200">-</button>
+                            <input type="number" value="${item.qty}" min="1" onchange="updateQty(${index}, this.value)" class="w-10 text-center focus:outline-none">
+                            <button onclick="updateQty(${index}, ${item.qty + 1})" class="px-2 bg-gray-50 hover:bg-gray-200">+</button>
+                        </div>
+                    </div>
+                    <div class="col-span-2 flex justify-between items-center pl-2">
+                        <span class="font-bold text-indigo-700">${formatMoney(item.price * item.qty)}</span>
+                        <button onclick="removeFromCart(${index})" class="text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                </div>`).join('');
+            lucide.createIcons();
+        };
+
+        const searchProductInfo = () => {
+            const code = document.getElementById('lookupInput').value.trim().toUpperCase();
+            const product = dbProducts[code];
+            if (product) {
+                document.getElementById('lookupId').innerText = `Mã: ${product.id}`;
+                document.getElementById('lookupName').innerText = product.name;
+                document.getElementById('lookupPrice').innerText = formatMoney(product.price);
+                document.getElementById('lookupStock').innerText = product.stock;
+                document.getElementById('lookupEmpty').classList.replace('flex', 'hidden');
+                document.getElementById('lookupResult').classList.replace('hidden', 'flex');
+            } else {
+                showModal('Không tìm thấy', `Mã sản phẩm "${code}" không tồn tại.`, true);
+            }
+        };
+        document.getElementById('lookupInput').addEventListener('keypress', e => { if(e.key === 'Enter') searchProductInfo(); });
+
+        document.getElementById('returnInvoiceInput').addEventListener('input', function() {
+            if (this.value.trim().length >= 8) searchInvoiceLogic(this.value.trim().toUpperCase(), false);
+            else {
+                document.getElementById('returnInvoiceResult').classList.replace('flex', 'hidden');
+                document.getElementById('returnEmptyState').classList.replace('hidden', 'flex');
+                currentReturnOrder = null;
+            }
+        });
+        const searchInvoiceForReturn = () => searchInvoiceLogic(document.getElementById('returnInvoiceInput').value.trim().toUpperCase(), true);
+
+        const searchInvoiceLogic = (code, showError) => {
+            const order = sessionOrders.find(o => o.id === code && !o.isReturn);
+            if (!order) {
+                if (showError) showModal('Lỗi', `Hóa đơn "${code}" không hợp lệ.`, true);
+                return;
+            }
+            currentReturnOrder = order;
+            document.getElementById('retInvId').innerText = order.id;
+            document.getElementById('retInvTime').innerText = order.time;
+            document.getElementById('retInvMember').innerText = order.memberName;
+            document.getElementById('retInvTotal').innerText = formatMoney(order.total);
+            renderReturnItems(); calculateRefund();
+            document.getElementById('returnEmptyState').classList.replace('flex', 'hidden');
+            document.getElementById('returnInvoiceResult').classList.replace('hidden', 'flex');
+        };
+
+        const renderReturnItems = () => {
+            const container = document.getElementById('returnItemsContainer');
+            container.innerHTML = currentReturnOrder.items.map((item, index) => {
+                const maxRet = item.qty - item.returnedQty;
+                return `
+                <div class="p-3 rounded-lg border ${maxRet === 0 ? 'bg-gray-100 opacity-60' : 'bg-white shadow-sm'} flex items-center justify-between">
+                    <div class="flex items-center gap-3 flex-1">
+                        <input type="checkbox" id="retCheck_${index}" class="w-5 h-5 text-red-600 rounded cursor-pointer" ${maxRet === 0 ? 'disabled' : ''} onchange="toggleReturnItem(${index}, ${maxRet})">
+                        <div>
+                            <label for="retCheck_${index}" class="font-bold cursor-pointer">${item.name} (${item.id})</label>
+                            <div class="text-sm text-gray-500 mt-1 flex gap-4">
+                                <span>Đã mua: <b>${item.qty}</b></span>
+                                <span>Đã trả: <b class="text-red-600">${item.returnedQty}</b></span>
+                                <span>Đơn giá: <b>${formatMoney(item.effectivePrice)}</b></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 bg-gray-50 p-2 rounded border opacity-50" id="retQtyWrapper_${index}">
+                        <span class="text-sm font-bold">SL TRẢ:</span>
+                        <input type="number" min="0" max="${maxRet}" value="0" id="retQty_${index}" oninput="calculateRefund()" class="w-16 border rounded p-1.5 text-center font-bold text-lg" disabled>
+                    </div>
+                </div>`;
+            }).join('');
+        };
+
+        const toggleReturnItem = (index, maxQty) => {
+            const chk = document.getElementById(`retCheck_${index}`), input = document.getElementById(`retQty_${index}`), wrap = document.getElementById(`retQtyWrapper_${index}`);
+            if(chk.checked) { input.disabled = false; input.value = maxQty; wrap.classList.remove('opacity-50'); }
+            else { input.disabled = true; input.value = 0; wrap.classList.add('opacity-50'); }
+            calculateRefund();
+        };
+
+        const calculateRefund = () => {
+            if (!currentReturnOrder) return { refundTotal: 0, revokedPoints: 0 };
+            let refundTotal = 0;
+            currentReturnOrder.items.forEach((item, index) => {
+                const input = document.getElementById(`retQty_${index}`), chk = document.getElementById(`retCheck_${index}`);
+                if (chk && chk.checked) {
+                    let qty = parseInt(input.value) || 0;
+                    const maxRet = item.qty - item.returnedQty;
+                    if (qty > maxRet) { qty = maxRet; input.value = qty; }
+                    refundTotal += qty * item.effectivePrice;
+                }
+            });
+            document.getElementById('retRefundTotal').innerText = formatMoney(refundTotal);
+            let revokedPoints = (currentReturnOrder.memberId && refundTotal > 0) ? Math.floor(refundTotal / POINT_EARN_RATE) : 0;
+            const msgEl = document.getElementById('retPointsRevokeMsg');
+            if (revokedPoints > 0) { msgEl.innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4"></i> Thu hồi: ${revokedPoints} điểm`; msgEl.style.display = 'flex'; lucide.createIcons(); }
+            else msgEl.style.display = 'none';
+            return { refundTotal, revokedPoints };
+        };
+
+        const processReturn = () => {
+            const { refundTotal, revokedPoints } = calculateRefund();
+            if (refundTotal === 0) return showModal('Lỗi', 'Vui lòng chọn sản phẩm trả.', true);
+
+            currentReturnOrder.items.forEach((item, index) => {
+                const input = document.getElementById(`retQty_${index}`), chk = document.getElementById(`retCheck_${index}`);
+                if (chk && chk.checked) {
+                    let qty = parseInt(input.value) || 0;
+                    if (qty > 0) { item.returnedQty += qty; if (dbProducts[item.id]) dbProducts[item.id].stock += qty; }
+                }
+            });
+
+            if (currentReturnOrder.memberId && dbMembers[currentReturnOrder.memberId]) {
+                dbMembers[currentReturnOrder.memberId].points = Math.max(0, dbMembers[currentReturnOrder.memberId].points - revokedPoints);
+            }
+
+            const returnInvoiceId = 'PTH' + Date.now().toString().slice(-6);
+            
+            const returnTimeString = new Date().toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            
+            sessionOrders.push({ id: returnInvoiceId, total: -refundTotal, time: returnTimeString, isReturn: true });
+            
+            showModal('Thành Công', `Mã Phiếu Trả Hàng: ${returnInvoiceId}\nTiền hoàn lại: ${formatMoney(refundTotal)}\nThu hồi: ${revokedPoints} điểm.`);
+            document.getElementById('returnInvoiceInput').value = '';
+            document.getElementById('returnInvoiceResult').classList.replace('flex', 'hidden');
+            document.getElementById('returnEmptyState').classList.replace('hidden', 'flex');
+        };
+
+        const renderHistoryData = () => {
+            const container = document.getElementById('historyContainer');
+            if (sessionOrders.length === 0) {
+                container.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Chưa có giao dịch nào trong ca.</td></tr>`;
+                return;
+            }
+            container.innerHTML = [...sessionOrders].reverse().map(order => {
+                let paymentBadge = `<span class="text-gray-400 text-xs">-</span>`;
+                if (!order.isReturn) {
+                    const payText = order.payment === 'CASH' ? 'Tiền mặt' : 'QR Code';
+                    const payColor = order.payment === 'CASH' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700';
+                    paymentBadge = `<span class="px-2 py-1 rounded text-xs font-semibold ${payColor}">${payText}</span>`;
+                }
+
+                return `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="p-4">
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono font-bold text-gray-700">${order.id}</span>
+                            <button onclick="copyToClipboard('${order.id}')" class="text-gray-400 hover:text-indigo-600 transition-colors cursor-pointer" title="Sao chép mã">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td class="p-4">${order.time}</td>
+                    <td class="p-4 font-medium">${order.memberName || 'Khách vãng lai'}</td>
+                    <td class="p-4">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold ${order.isReturn ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
+                            ${order.isReturn ? 'Trả hàng' : 'Bán hàng'}
+                        </span>
+                    </td>
+                    <td class="p-4">${paymentBadge}</td>
+                    <td class="p-4 text-right font-bold ${order.isReturn ? 'text-red-600' : 'text-indigo-600'}">
+                        ${formatMoney(order.total)}
+                    </td>
+                </tr>
+            `}).join('');
+            lucide.createIcons();
+        };
+
+        const renderRevenueChartData = () => {
+            const totalOrders = sessionOrders.length;
+            const totalRevenue = sessionOrders.reduce((sum, order) => sum + order.total, 0);
+            
+            document.getElementById('statTotalOrders').innerText = totalOrders;
+            document.getElementById('statTotalRevenue').innerText = formatMoney(totalRevenue);
+            
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            if (revenueChartInstance) revenueChartInstance.destroy();
+
+            let cumulativeRevenue = 0;
+            const labels = sessionOrders.map(o => o.time);
+            const dataPoints = sessionOrders.map(o => {
+                cumulativeRevenue += o.total;
+                return cumulativeRevenue;
+            });
+            
+            if (labels.length === 0) { labels.push('Chưa có GD'); dataPoints.push(0); }
+
+            revenueChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Giao dịch (VNĐ)', data: dataPoints, borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderWidth: 3, pointBackgroundColor: '#ffffff', pointBorderColor: '#4f46e5', pointBorderWidth: 2, fill: true, tension: 0.3 
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ' ' + formatMoney(ctx.raw) } } },
+                    scales: { y: { beginAtZero: true, ticks: { callback: (val) => val >= 1000 ? (val / 1000) + 'k' : val } } }
+                }
+            });
+        };
+
+        renderCart();
+
+        document.getElementById('barcodeInput').focus();
+
+        document.getElementById('barcodeInput').addEventListener('keypress', async function(e) {
+            if (e.key === 'Enter') {
+                const inputStr = this.value.trim().toUpperCase();
+                if (inputStr === '') return handleCheckout();
+                
+                this.disabled = true;
+                await addToCartAsync(inputStr);
+                
+                this.value = '';
+                this.disabled = false;
+                this.focus();
+            }
+        });
+
+        const addToCartAsync = async (inputStr) => {
+            let code = inputStr, qtyToAdd = 1;
+            if (inputStr.includes('*')) {
+                const parts = inputStr.split('*');
+                if (!isNaN(parts[0]) && parts[0] !== '') { qtyToAdd = parseInt(parts[0]); code = parts[1]; } 
+                else if (!isNaN(parts[1]) && parts[1] !== '') { qtyToAdd = parseInt(parts[1]); code = parts[0]; }
+            }
+
+        try {
+            const response = await fetch(`http://localhost:3000/api/products/${code}`);
+            const result = await response.json();
+
+            if (!result.success) {
+                return showModal('Không tìm thấy', `Mã sản phẩm "${code}" không tồn tại.`, true);
+            }
+
+            const product = result.data;
+            const existingItem = cart.find(item => item.id === product.id);
+            
+            if (existingItem) {
+                if (existingItem.qty + qtyToAdd <= product.stock) existingItem.qty += qtyToAdd;
+                else { 
+                    showModal('Cảnh báo', `Kho chỉ còn ${product.stock}. Đã thêm tối đa.`, true); 
+                    existingItem.qty = product.stock; 
+                }
+            } else {
+                if (qtyToAdd > product.stock) { 
+                    showModal('Cảnh báo', `Kho chỉ còn ${product.stock}. Đã thêm tối đa.`, true); 
+                    qtyToAdd = product.stock; 
+                }
+                cart.push({ ...product, qty: qtyToAdd });
+            }
+            
+            renderCart(); 
+            calculateTotal();
+            const container = document.getElementById('cartContainer');
+            setTimeout(() => { container.scrollTop = container.scrollHeight; }, 50);
+
+            } catch (error) {
+                showModal('Lỗi kết nối', 'Không thể kết nối đến máy chủ CSDL.', true);
+            }
+        };
+
+        let qrCodeObj = null;
+
+        const handleSearchClick = async () => {
+            const input = document.getElementById('barcodeInput');
+            const inputStr = input.value.trim().toUpperCase();
+            if (inputStr === '') return;
+            input.disabled = true;
+            await addToCartAsync(inputStr);
+            input.value = '';
+            input.disabled = false;
+            input.focus();
+        };
+        let lastQrAmount = -1;
+
+        const setPayment = (method) => {
+            paymentMethod = method;
+            document.querySelectorAll('.payment-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+                btn.classList.add('border-gray-200', 'bg-white', 'text-gray-600');
+            });
+            const activeBtn = document.getElementById('btn' + method);
+            activeBtn.classList.remove('border-gray-200', 'bg-white', 'text-gray-600');
+            activeBtn.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
+
+            const qrContainer = document.getElementById('qrContainer');
+            if (currentFinalTotal > 0) {
+                qrContainer.classList.remove('hidden');
+            } else {
+                qrContainer.classList.add('hidden');
+                lastQrAmount = -1;
+            }
+        };
+
+        const generatePaymentQR = () => {
+            if (currentFinalTotal <= 0) return;
+            if (lastQrAmount === currentFinalTotal) return;
+            lastQrAmount = currentFinalTotal;
+            const paymentData =`eMarket_ThanhToan_${currentFinalTotal}VND`;
+            const qrElement = document.getElementById("qrcode");
+            qrElement.innerHTML = "";
+            qrCodeObj = new QRCode(qrElement, {
+                text: paymentData,
+                width: 150,
+                height: 150,
+                colorDark : "#4338ca",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        };
+    </script>
+</body>
+</html>

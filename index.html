@@ -678,6 +678,40 @@
                 }
             }
 
+            try {
+                const stockResponse = await fetch(
+                    'http://localhost:3000/api/products/decrease-stock',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            items: cart.map(item => ({
+                                productId: item.id,
+                                quantity: item.qty
+                            }))
+                        })
+                    }
+                );
+
+                const stockResult = await stockResponse.json();
+
+                if (!stockResult.success) {
+                    return showModal(
+                        'Lỗi',
+                        stockResult.message || 'Không thể cập nhật tồn kho.',
+                        true
+                    );
+                }
+            } catch (error) {
+                return showModal(
+                    'Lỗi kết nối',
+                    'Không thể cập nhật tồn kho.',
+                    true
+                );
+            }
+
             sessionOrders.push({
                 id: invoiceId, total: currentFinalTotal, time: timeString, items: savedItems,
                 memberId: currentMember ? currentMember.id : null,
@@ -817,32 +851,87 @@
             return { refundTotal, revokedPoints };
         };
 
-        const processReturn = () => {
+        const processReturn = async () => {
             const { refundTotal, revokedPoints } = calculateRefund();
             if (refundTotal === 0) return showModal('Lỗi', 'Vui lòng chọn sản phẩm trả.', true);
+            
+            try {
+                // - Bước 1: Gửi yêu cầu hoàn lại tồn kho cho từng sản phẩm
+                for (let index = 0; index < currentReturnOrder.items.length; index++) {
+                    const item = currentReturnOrder.items[index];
+                    const input = document.getElementById(`retQty_${index}`);
+                    const chk = document.getElementById(`retCheck_${index}`);
+                    
+                    if (chk && chk.checked) {
+                        let qty = parseInt(input.value) || 0;
+                        if (qty > 0) { 
+                            const response = await fetch('http://localhost:3000/api/products/increase-stock', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ productId: item.id, quantity: qty })
+                            });
 
-            currentReturnOrder.items.forEach((item, index) => {
-                const input = document.getElementById(`retQty_${index}`), chk = document.getElementById(`retCheck_${index}`);
-                if (chk && chk.checked) {
-                    let qty = parseInt(input.value) || 0;
-                    if (qty > 0) { item.returnedQty += qty; if (dbProducts[item.id]) dbProducts[item.id].stock += qty; }
+                            if (!response.ok) throw new Error(`Lỗi cập nhật kho: Mã ${response.status}`);
+                            
+                            item.returnedQty += qty; 
+                            // Cập nhật giao diện tạm thời
+                            if (typeof dbProducts !== 'undefined' && dbProducts[item.id]) {
+                                dbProducts[item.id].stock += qty; 
+                            }
+                        }
+                    }
                 }
-            });
 
-            if (currentReturnOrder.memberId && dbMembers[currentReturnOrder.memberId]) {
-                dbMembers[currentReturnOrder.memberId].points = Math.max(0, dbMembers[currentReturnOrder.memberId].points - revokedPoints);
+                // - Bước 2: Gửi yêu cầu thu hồi điểm (nếu là khách thành viên)
+                if (currentReturnOrder.memberId && revokedPoints > 0) {
+                    const pointRes = await fetch('http://localhost:3000/api/members/revoke-points', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ memberId: currentReturnOrder.memberId, points: revokedPoints })
+                    });
+                    
+                    if (!pointRes.ok) throw new Error('Lỗi thu hồi điểm');
+                    
+                    // Cập nhật biến tạm trên giao diện
+                    if (typeof dbMembers !== 'undefined' && dbMembers[currentReturnOrder.memberId]) {
+                        dbMembers[currentReturnOrder.memberId].points = Math.max(0, dbMembers[currentReturnOrder.memberId].points - revokedPoints);
+                    }
+                }
+
+                // - Bước 3: Tạo mã hóa đơn và gửi yêu cầu lưu lịch sử
+                const returnInvoiceId = 'PTH' + Date.now().toString().slice(-6);
+                const returnTimeString = new Date().toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                
+                const orderData = { 
+                    id: returnInvoiceId, 
+                    total: -refundTotal, 
+                    time: returnTimeString, 
+                    isReturn: true,
+                    memberId: currentReturnOrder.memberId
+                };
+
+                const orderRes = await fetch('http://localhost:3000/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+
+                if (!orderRes.ok) throw new Error('Lỗi lưu hóa đơn');
+
+                // - Lưu vào biến mảng để bảng lịch sử (Lịch sử HĐ) hiển thị ngay lập tức
+                sessionOrders.push(orderData);
+                
+                // - Hiển thị thông báo thành công và dọn dẹp giao diện
+                showModal('Thành Công', `Mã Phiếu Trả Hàng: ${returnInvoiceId}\nTiền hoàn lại: ${formatMoney(refundTotal)}\nThu hồi: ${revokedPoints} điểm.`);
+                
+                document.getElementById('returnInvoiceInput').value = '';
+                document.getElementById('returnInvoiceResult').classList.replace('flex', 'hidden');
+                document.getElementById('returnEmptyState').classList.replace('hidden', 'flex');
+
+            } catch (error) {
+                console.error('Lỗi khi xử lý trả hàng:', error);
+                showModal('Lỗi', 'Không thể hoàn tất trả hàng do lỗi kết nối máy chủ. Dữ liệu chưa được lưu!', true);
             }
-
-            const returnInvoiceId = 'PTH' + Date.now().toString().slice(-6);
-            
-            const returnTimeString = new Date().toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            
-            sessionOrders.push({ id: returnInvoiceId, total: -refundTotal, time: returnTimeString, isReturn: true });
-            
-            showModal('Thành Công', `Mã Phiếu Trả Hàng: ${returnInvoiceId}\nTiền hoàn lại: ${formatMoney(refundTotal)}\nThu hồi: ${revokedPoints} điểm.`);
-            document.getElementById('returnInvoiceInput').value = '';
-            document.getElementById('returnInvoiceResult').classList.replace('flex', 'hidden');
-            document.getElementById('returnEmptyState').classList.replace('hidden', 'flex');
         };
 
         const renderHistoryData = () => {

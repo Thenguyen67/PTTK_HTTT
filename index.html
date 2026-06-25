@@ -572,19 +572,44 @@
 
         const removeFromCart = (index) => { cart.splice(index, 1); renderCart(); calculateTotal(); };
 
-        const applyMember = () => {
+        const applyMember = async () => {
             const code = document.getElementById('memberInput').value.trim().toUpperCase();
-            const member = dbMembers[code];
-            if (!member) return showModal('Lỗi', 'Không tìm thấy thẻ.', true);
-            currentMember = member;
-            document.getElementById('memberInputSection').classList.add('hidden');
-            document.getElementById('memberInfoSection').classList.remove('hidden');
-            document.getElementById('memberName').innerText = member.name;
-            document.getElementById('memberRankBadge').innerText = member.rank;
-            document.getElementById('memberRankBadge').className = `px-2 py-0.5 rounded text-xs font-bold text-white bg-gradient-to-r ${member.color}`;
-            document.getElementById('memberDiscount').innerText = (member.discountRate * 100) + '%';
-            document.getElementById('memberPoints').innerText = member.points;
-            calculateTotal();
+            if (!code) return;
+
+            try {
+                // Gửi yêu cầu tìm khách hàng xuống Database
+                const response = await fetch(`http://localhost:3000/api/members/${code}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    return showModal('Lỗi', 'Không tìm thấy thẻ thành viên trong hệ thống.', true);
+                }
+
+                const member = result.data;
+                
+                // Gán dữ liệu vào biến currentMember theo cấu trúc cũ để tính toán tiền
+                currentMember = {
+                    id: member.id,
+                    name: member.name,
+                    rank: member.rank_name || 'Thành viên',
+                    discountRate: parseFloat(member.discount_rate) || 0,
+                    points: member.points
+                };
+
+                // Cập nhật giao diện
+                document.getElementById('memberInputSection').classList.add('hidden');
+                document.getElementById('memberInfoSection').classList.remove('hidden');
+                document.getElementById('memberName').innerText = currentMember.name;
+                document.getElementById('memberRankBadge').innerText = currentMember.rank;
+                document.getElementById('memberRankBadge').className = `px-2 py-0.5 rounded text-xs font-bold text-white bg-gradient-to-r from-yellow-400 to-orange-500`;
+                document.getElementById('memberDiscount').innerText = (currentMember.discountRate * 100) + '%';
+                document.getElementById('memberPoints').innerText = currentMember.points;
+                
+                // Tính toán lại tổng tiền giỏ hàng (áp dụng chiết khấu/điểm)
+                calculateTotal();
+            } catch (error) {
+                showModal('Lỗi', 'Không thể kết nối đến máy chủ.', true);
+            }
         };
 
         const removeMember = () => {
@@ -757,22 +782,33 @@
             lucide.createIcons();
         };
 
-        const searchProductInfo = () => {
+        const searchProductInfo = async () => {
             const code = document.getElementById('lookupInput').value.trim().toUpperCase();
-            const product = dbProducts[code];
-            if (product) {
-                document.getElementById('lookupId').innerText = `Mã: ${product.id}`;
-                document.getElementById('lookupName').innerText = product.name;
-                document.getElementById('lookupPrice').innerText = formatMoney(product.price);
-                document.getElementById('lookupStock').innerText = product.stock;
-                document.getElementById('lookupEmpty').classList.replace('flex', 'hidden');
-                document.getElementById('lookupResult').classList.replace('hidden', 'flex');
-            } else {
-                showModal('Không tìm thấy', `Mã sản phẩm "${code}" không tồn tại.`, true);
+            if (!code) return;
+
+            try {
+                // Gửi yêu cầu tìm sản phẩm xuống Database
+                const response = await fetch(`http://localhost:3000/api/products/${code}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const product = result.data;
+                    document.getElementById('lookupId').innerText = `Mã: ${product.id}`;
+                    document.getElementById('lookupName').innerText = product.name;
+                    document.getElementById('lookupPrice').innerText = formatMoney(product.price);
+                    document.getElementById('lookupStock').innerText = product.stock;
+                    
+                    document.getElementById('lookupEmpty').classList.replace('flex', 'hidden');
+                    document.getElementById('lookupResult').classList.replace('hidden', 'flex');
+                } else {
+                    showModal('Không tìm thấy', `Mã sản phẩm "${code}" không tồn tại.`, true);
+                }
+            } catch (error) {
+                showModal('Lỗi', 'Không thể kết nối đến máy chủ.', true);
             }
         };
-        document.getElementById('lookupInput').addEventListener('keypress', e => { if(e.key === 'Enter') searchProductInfo(); });
 
+        document.getElementById('lookupInput').addEventListener('keypress', e => { if(e.key === 'Enter') searchProductInfo(); });
         document.getElementById('returnInvoiceInput').addEventListener('input', function() {
             if (this.value.trim().length >= 8) searchInvoiceLogic(this.value.trim().toUpperCase(), false);
             else {

@@ -322,17 +322,43 @@
 
             <main id="view-history" class="tab-content hidden w-full h-full p-6 overflow-y-auto">
                 <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col min-h-full">
-                    <div class="p-6 border-b border-gray-200 shrink-0">
+                    <div class="p-6 border-b border-gray-200 shrink-0 flex flex-wrap items-center justify-between gap-4">
                         <h3 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
                             <div class="bg-indigo-100 p-2 rounded-lg"><i data-lucide="clipboard-list" class="text-indigo-600 w-6 h-6"></i></div>
                             Lịch sử giao dịch trong ca
                         </h3>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <div class="flex gap-1 bg-gray-100 rounded-lg p-1">
+                                <button onclick="filterHistory('all')" id="hFilterAll" class="history-filter-btn px-3 py-1.5 rounded-md text-sm font-semibold bg-white text-indigo-700 shadow-sm transition-all">Tất cả</button>
+                                <button onclick="filterHistory('sell')" id="hFilterSell" class="history-filter-btn px-3 py-1.5 rounded-md text-sm font-semibold text-gray-500 hover:bg-white transition-all">Bán hàng</button>
+                                <button onclick="filterHistory('return')" id="hFilterReturn" class="history-filter-btn px-3 py-1.5 rounded-md text-sm font-semibold text-gray-500 hover:bg-white transition-all">Trả hàng</button>
+                            </div>
+                            <div class="relative">
+                                <i data-lucide="search" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                                <input type="text" id="historySearch" placeholder="Tìm mã HĐ / khách..." oninput="renderHistoryData()" class="pl-8 pr-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-48">
+                            </div>
+                        </div>
                     </div>
-                    
-                    <div class="flex-1 p-0 overflow-auto">
+                    <!-- Summary bar -->
+                    <div class="grid grid-cols-3 gap-4 p-4 bg-gray-50 border-b border-gray-200 shrink-0" id="historySummary">
+                        <div class="bg-white rounded-lg p-3 border border-gray-100 shadow-sm text-center">
+                            <div class="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-1">Giao dịch hiển thị</div>
+                            <div class="text-2xl font-black text-indigo-700" id="hSumCount">0</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 border border-gray-100 shadow-sm text-center">
+                            <div class="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-1">Doanh thu bán</div>
+                            <div class="text-xl font-black text-green-700" id="hSumRevenue">0 đ</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 border border-gray-100 shadow-sm text-center">
+                            <div class="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-1">Tiền hoàn trả</div>
+                            <div class="text-xl font-black text-red-600" id="hSumRefund">0 đ</div>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-auto">
                         <table class="w-full text-left text-sm text-gray-600">
-                            <thead class="bg-gray-50 text-gray-700 font-semibold sticky top-0 border-b border-gray-200">
+                            <thead class="bg-gray-50 text-gray-700 font-semibold sticky top-0 border-b border-gray-200 z-10">
                                 <tr>
+                                    <th class="p-4 w-8"></th>
                                     <th class="p-4">Mã Hóa Đơn</th>
                                     <th class="p-4">Thời Gian</th>
                                     <th class="p-4">Khách Hàng</th>
@@ -381,6 +407,44 @@
             </main>
         </div>
     </div>
+
+            <main id="view-members" class="tab-content hidden w-full h-full p-6 overflow-y-auto">
+                <div class="max-w-xl mx-auto">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-2xl font-bold text-gray-800 flex items-center gap-3 mb-6 border-b pb-4">
+                            <div class="bg-purple-100 p-2 rounded-lg"><i data-lucide="user-plus" class="text-purple-600 w-6 h-6"></i></div>
+                            Tạo thẻ thành viên mới
+                        </h3>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-600 mb-1">Số điện thoại <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <i data-lucide="phone" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                                    <input type="text" id="newMemberPhone" placeholder="VD: 0901234567" maxlength="10"
+                                        oninput="this.value=this.value.replace(/\D/g,'')"
+                                        class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm">
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">SDT sẽ tự động trở thành mã thẻ thành viên.</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-600 mb-1">Họ và tên <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <i data-lucide="user" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                                    <input type="text" id="newMemberName" placeholder="Nguyễn Văn A"
+                                        class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm">
+                                </div>
+                            </div>
+                            <div class="pt-2">
+                                <button onclick="createMember()"
+                                    class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-8 py-3 rounded-lg shadow-sm transition-transform active:scale-95 flex items-center gap-2">
+                                    <i data-lucide="user-check" class="w-5 h-5"></i> Tạo thẻ thành viên
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
 
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-[150]">
         <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full transform scale-95 transition-transform duration-300" id="modalContent">
@@ -464,7 +528,7 @@
             switchTab('view-pos'); 
         }
 
-        const POINT_VALUE = 1000; 
+        const POINT_VALUE = 100; 
         const POINT_EARN_RATE = 10000; 
 
         let cart = [];
@@ -517,6 +581,7 @@
             if (tabId === 'view-pos') setTimeout(() => document.getElementById('barcodeInput').focus(), 100);
             if (tabId === 'view-lookup') setTimeout(() => document.getElementById('lookupInput').focus(), 100);
             if (tabId === 'view-return') setTimeout(() => document.getElementById('returnInvoiceInput').focus(), 100);
+            if (tabId === 'view-members') { setTimeout(() => document.getElementById('newMemberPhone').focus(), 100); }
         };
 
         window.addEventListener('keydown', function(e) {
@@ -526,6 +591,7 @@
             else if (e.key === 'F3') { e.preventDefault(); switchTab('view-lookup'); }
             else if (e.key === 'F4') { e.preventDefault(); switchTab('view-history'); }
             else if (e.key === 'F5') { e.preventDefault(); switchTab('view-report'); }
+            else if (e.key === 'F6') { e.preventDefault(); switchTab('view-members'); }
         });
 
         const showModal = (title, message, isError = false) => {
@@ -581,20 +647,55 @@
                 const result = await response.json();
 
                 if (!result.success) {
-                    return showModal('Lỗi', 'Không tìm thấy thẻ thành viên trong hệ thống.', true);
+                    // TRƯỜNG HỢP 1: THẺ CHƯA TỒN TẠI -> Tự động bật hộp thoại tạo thẻ
+                    const newName = prompt(
+                        `Số điện thoại "${code}" chưa có thẻ thành viên.\nVui lòng nhập họ tên khách hàng để tạo thẻ mới:`, 
+                        `Khách hàng ${code}`
+                    );
+                    
+                    if (!newName || newName.trim() === '') return; // Nhấn "Hủy" hoặc để trống thì dừng
+
+                    const createRes = await fetch('http://localhost:3000/api/members/create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id: code,
+                            name: newName.trim(),
+                            phone: code,
+                            rank_name: 'Thành viên',
+                            discount_rate: 0,
+                            points: 0
+                        })
+                    });
+                    const createData = await createRes.json();
+
+                    if (!createData.success) {
+                        return showModal('Lỗi', createData.message || 'Không thể tạo thẻ mới.', true);
+                    }
+
+                    // Gán thẻ vừa tạo vào phiên giao dịch hiện tại (điểm ban đầu = 0)
+                    currentMember = {
+                        id: code,
+                        name: newName.trim(),
+                        rank: 'Thành viên',
+                        discountRate: 0,
+                        points: 0
+                    };
+                    showModal('Tạo thẻ thành công', `Đã tạo thẻ mới cho: ${newName.trim()}`);
+
+                } else {
+                    // TRƯỜNG HỢP 2: THẺ ĐÃ TỒN TẠI -> Lấy thông tin & dùng điểm giảm giá
+                    const member = result.data;
+                    currentMember = {
+                        id: member.id,
+                        name: member.name,
+                        rank: member.rank_name || 'Thành viên',
+                        discountRate: parseFloat(member.discount_rate) || 0,
+                        points: member.points
+                    };
                 }
 
-                const member = result.data;
-                
-                currentMember = {
-                    id: member.id,
-                    name: member.name,
-                    rank: member.rank_name || 'Thành viên',
-                    discountRate: parseFloat(member.discount_rate) || 0,
-                    points: member.points
-                };
-
-                // Cập nhật giao diện
+                // Cập nhật giao diện POS cho cả 2 trường hợp
                 document.getElementById('memberInputSection').classList.add('hidden');
                 document.getElementById('memberInfoSection').classList.remove('hidden');
                 document.getElementById('memberName').innerText = currentMember.name;
@@ -603,8 +704,8 @@
                 document.getElementById('memberDiscount').innerText = (currentMember.discountRate * 100) + '%';
                 document.getElementById('memberPoints').innerText = currentMember.points;
                 
-                // Tính toán lại tổng tiền giỏ hàng (áp dụng chiết khấu/điểm)
-                calculateTotal();
+                calculateTotal(); // Hàm này sẽ tự động tính toán trừ điểm và hiển thị điểm tích luỹ mới
+
             } catch (error) {
                 showModal('Lỗi', 'Không thể kết nối đến máy chủ.', true);
             }
@@ -978,13 +1079,43 @@
             }
         };
 
+        let historyFilter = 'all';
+
+        const filterHistory = (type) => {
+            historyFilter = type;
+            document.querySelectorAll('.history-filter-btn').forEach(b => {
+                b.classList.remove('bg-white', 'text-indigo-700', 'shadow-sm');
+                b.classList.add('text-gray-500');
+            });
+            const active = document.getElementById('hFilter' + type.charAt(0).toUpperCase() + type.slice(1));
+            if (active) { active.classList.add('bg-white', 'text-indigo-700', 'shadow-sm'); active.classList.remove('text-gray-500'); }
+            renderHistoryData();
+        };
+
         const renderHistoryData = () => {
             const container = document.getElementById('historyContainer');
-            if (sessionOrders.length === 0) {
-                container.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">Chưa có giao dịch nào trong ca.</td></tr>`;
+            const searchVal = (document.getElementById('historySearch')?.value || '').toLowerCase();
+
+            let filtered = [...sessionOrders].reverse().filter(order => {
+                if (historyFilter === 'sell' && order.isReturn) return false;
+                if (historyFilter === 'return' && !order.isReturn) return false;
+                if (searchVal && !order.id.toLowerCase().includes(searchVal) && !(order.memberName || '').toLowerCase().includes(searchVal)) return false;
+                return true;
+            });
+
+            // Update summary
+            const sellTotal = filtered.filter(o => !o.isReturn).reduce((s, o) => s + o.total, 0);
+            const retTotal = filtered.filter(o => o.isReturn).reduce((s, o) => s + o.total, 0);
+            document.getElementById('hSumCount').innerText = filtered.length;
+            document.getElementById('hSumRevenue').innerText = formatMoney(sellTotal);
+            document.getElementById('hSumRefund').innerText = formatMoney(retTotal);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">Không có giao dịch nào phù hợp.</td></tr>`;
                 return;
             }
-            container.innerHTML = [...sessionOrders].reverse().map(order => {
+
+            container.innerHTML = filtered.map(order => {
                 let paymentBadge = `<span class="text-gray-400 text-xs">-</span>`;
                 if (!order.isReturn) {
                     const payText = order.payment === 'CASH' ? 'Tiền mặt' : 'QR Code';
@@ -992,17 +1123,30 @@
                     paymentBadge = `<span class="px-2 py-1 rounded text-xs font-semibold ${payColor}">${payText}</span>`;
                 }
 
+                // Build items detail rows
+                const itemsHtml = order.items ? order.items.map(it => `
+                    <div class="flex justify-between items-center py-1 border-b border-gray-100 last:border-0">
+                        <span class="text-xs text-gray-500 font-mono">${it.id}</span>
+                        <span class="flex-1 px-3 text-sm font-medium text-gray-700">${it.name}</span>
+                        <span class="text-xs text-gray-500">x${it.qty}</span>
+                        <span class="ml-3 text-sm font-bold text-indigo-700 w-28 text-right">${formatMoney(it.effectivePrice * it.qty)}</span>
+                    </div>`).join('') : '<p class="text-xs text-gray-400 p-2">Không có chi tiết</p>';
+
+                const detailRowId = `detail_${order.id}`;
                 return `
-                <tr class="hover:bg-gray-50 transition-colors">
+                <tr class="hover:bg-gray-50 transition-colors cursor-pointer" onclick="toggleHistoryDetail('${detailRowId}')">
+                    <td class="p-4 w-8">
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 transition-transform duration-200" id="icon_${detailRowId}"></i>
+                    </td>
                     <td class="p-4">
                         <div class="flex items-center gap-2">
                             <span class="font-mono font-bold text-gray-700">${order.id}</span>
-                            <button onclick="copyToClipboard('${order.id}')" class="text-gray-400 hover:text-indigo-600 transition-colors cursor-pointer" title="Sao chép mã">
+                            <button onclick="event.stopPropagation(); copyToClipboard('${order.id}')" class="text-gray-400 hover:text-indigo-600 transition-colors" title="Sao chép mã">
                                 <i data-lucide="copy" class="w-4 h-4"></i>
                             </button>
                         </div>
                     </td>
-                    <td class="p-4">${order.time}</td>
+                    <td class="p-4 text-gray-500">${order.time}</td>
                     <td class="p-4 font-medium">${order.memberName || 'Khách vãng lai'}</td>
                     <td class="p-4">
                         <span class="px-2.5 py-1 rounded-full text-xs font-bold ${order.isReturn ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">
@@ -1010,12 +1154,27 @@
                         </span>
                     </td>
                     <td class="p-4">${paymentBadge}</td>
-                    <td class="p-4 text-right font-bold ${order.isReturn ? 'text-red-600' : 'text-indigo-600'}">
+                    <td class="p-4 text-right font-bold ${order.isReturn ? 'text-red-600' : 'text-indigo-700'}">
                         ${formatMoney(order.total)}
                     </td>
                 </tr>
-            `}).join('');
+                <tr id="${detailRowId}" class="hidden bg-indigo-50">
+                    <td colspan="7" class="px-8 py-3">
+                        <div class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-2">Chi tiết sản phẩm</div>
+                        ${itemsHtml}
+                    </td>
+                </tr>`;
+            }).join('');
             lucide.createIcons();
+        };
+
+        const toggleHistoryDetail = (rowId) => {
+            const row = document.getElementById(rowId);
+            const icon = document.getElementById('icon_' + rowId);
+            if (!row) return;
+            const isHidden = row.classList.contains('hidden');
+            row.classList.toggle('hidden', !isHidden);
+            if (icon) icon.style.transform = isHidden ? 'rotate(90deg)' : '';
         };
 
         const renderRevenueChartData = () => {
@@ -1168,6 +1327,49 @@
                 correctLevel : QRCode.CorrectLevel.H
             });
         };
+        // ==================== MEMBER MANAGEMENT ====================
+
+        const RANK_MAP = {
+            member:   { label: 'Thành viên', rate: 0,    color: 'from-gray-400 to-gray-500' },
+            silver:   { label: 'Bạc',         rate: 0.03, color: 'from-gray-400 to-gray-300' },
+            gold:     { label: 'Vàng',         rate: 0.05, color: 'from-yellow-400 to-orange-500' },
+            platinum: { label: 'Bạch Kim',     rate: 0.10, color: 'from-indigo-400 to-purple-500' },
+        };
+
+        const createMember = async () => {
+            const phone = document.getElementById('newMemberPhone').value.trim();
+            const name  = document.getElementById('newMemberName').value.trim();
+            const rankSel = document.getElementById('newMemberRank');
+            const rankKey  = rankSel.value;
+            const rankInfo = RANK_MAP[rankKey] || RANK_MAP.member;
+
+            if (!phone || phone.length < 9) return showModal('Thiếu thông tin', 'Vui lòng nhập số điện thoại hợp lệ (9-10 số).', true);
+            if (!name)  return showModal('Thiếu thông tin', 'Vui lòng nhập họ và tên thành viên.', true);
+
+            try {
+                const res = await fetch('http://localhost:3000/api/members/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: phone,
+                        name: name,
+                        phone: phone,
+                        rank_name: rankInfo.label,
+                        discount_rate: rankInfo.rate,
+                        points: 0
+                    })
+                });
+                const result = await res.json();
+                if (!result.success) return showModal('Lỗi', result.message || 'Không thể tạo thẻ thành viên.', true);
+
+                showModal('Thành công', `Đã tạo thẻ thành viên!\nMã thẻ: ${phone}\nHọ tên: ${name}\nHạng: ${rankInfo.label}`);
+                document.getElementById('newMemberPhone').value = '';
+                document.getElementById('newMemberName').value = '';
+                document.getElementById('newMemberRank').value = 'member';
+                setTimeout(() => document.getElementById('newMemberPhone').focus(), 300);
+            } catch (e) {
+                showModal('Lỗi kết nối', 'Không thể kết nối đến máy chủ.', true);
+            }
+        };
+
     </script>
-</body>
-</html>

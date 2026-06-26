@@ -158,6 +158,46 @@ app.get('/api/members/:id', async (req, res) => {
     }
 });
 
+app.get('/api/members', async (req, res) => {
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute('SELECT * FROM members ORDER BY created_at DESC');
+        res.json({ success: true, data: rows });
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách thành viên:', error);
+        res.status(500).json({ success: false, message: 'Lỗi máy chủ nội bộ' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+app.post('/api/members/create', async (req, res) => {
+    const { id, name, phone, rank_name, discount_rate, points } = req.body;
+    if (!id || !name) {
+        return res.status(400).json({ success: false, message: 'Thiếu thông tin bắt buộc (id, name).' });
+    }
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        // Kiểm tra trùng
+        const [existing] = await connection.execute('SELECT id FROM members WHERE id = ?', [id]);
+        if (existing.length > 0) {
+            return res.status(409).json({ success: false, message: `Thẻ thành viên với SDT "${id}" đã tồn tại.` });
+        }
+        await connection.execute(
+            'INSERT INTO members (id, name, phone, rank_name, discount_rate, points, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
+            [id, name, phone || id, rank_name || 'Thành viên', discount_rate || 0, points || 0]
+        );
+        res.json({ success: true, message: 'Tạo thẻ thành viên thành công.' });
+    } catch (error) {
+        console.error('Lỗi khi tạo thành viên:', error);
+        res.status(500).json({ success: false, message: 'Lỗi máy chủ khi tạo thành viên.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`[SERVER] Máy chủ eMarket đang chạy tại: http://localhost:${PORT}`);

@@ -807,8 +807,15 @@
             if (currentMember) {
                 discountAmount = subTotal * currentMember.discountRate;
                 const tempTotal = subTotal - discountAmount;
-                let maxPointsForBill = Math.floor(tempTotal / POINT_VALUE);
-                let pointsToUse = Math.min(currentMember.points, maxPointsForBill);
+                
+                let pointsToUse = 0;
+                
+                // Chỉ sử dụng điểm nếu thành viên có từ 100 điểm trở lên
+                if (currentMember.points >= 100) {
+                    let maxPointsForBill = Math.floor(tempTotal / POINT_VALUE);
+                    pointsToUse = Math.min(currentMember.points, maxPointsForBill);
+                }
+                
                 document.getElementById('usePointsInput').value = pointsToUse;
                 pointDiscountAmount = pointsToUse * POINT_VALUE;
             } else {
@@ -844,7 +851,7 @@
                 }
             }
         };
-
+        
         const handleCheckout = async () => {
             if (cart.length === 0) return showModal('Trống', 'Vui lòng quét mặt hàng.', true);
             

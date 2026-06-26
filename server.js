@@ -20,6 +20,34 @@ const dbConfig = {
     }
 };
 
+app.post('/api/auth/login', async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ success: false, message: 'Vui lòng nhập đầy đủ thông tin.' });
+    }
+
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute(
+            'SELECT id, full_name, username FROM employees WHERE username = ? AND password = ?',
+            [username, password]
+        );
+
+        if (rows.length > 0) {
+            res.json({ success: true, data: rows[0] });
+        } else {
+            res.status(401).json({ success: false, message: 'Tên đăng nhập hoặc mật khẩu không chính xác!' });
+        }
+    } catch (error) {
+        console.error('Lỗi kiểm tra đăng nhập:', error);
+        res.status(500).json({ success: false, message: 'Lỗi kết nối máy chủ.' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });

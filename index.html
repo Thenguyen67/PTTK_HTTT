@@ -18,33 +18,42 @@
 </head>
 <body class="bg-gray-100 h-screen overflow-hidden font-sans select-none text-gray-800">
 
-    <div id="loginScreen" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-[100]">
-        <div class="bg-white p-8 md:p-10 rounded-2xl shadow-2xl max-w-md w-full w-[90%] text-center">
-            <div class="mb-8 flex flex-col items-center">
-                <div class="bg-indigo-100 p-4 rounded-full mb-4 shadow-sm border border-indigo-200">
-                    <i data-lucide="lock" class="w-8 h-8 text-indigo-700"></i>
+    <div id="loginScreen" class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-[100]">
+        <div class="bg-white p-8 md:p-10 rounded-2xl shadow-2xl max-w-sm w-full w-[90%] text-center border border-gray-100">
+            <div class="mb-6 flex flex-col items-center">
+                <div class="bg-indigo-50 p-4 rounded-full mb-3 text-indigo-600 shadow-inner">
+                    <i data-lucide="monitor" class="w-8 h-8"></i>
                 </div>
-                <h2 class="text-3xl font-black text-gray-800 tracking-wide">Xác Thực</h2>
-                <p class="text-gray-500 mt-2 font-medium">Vui lòng nhập mã PIN 6 số của nhân viên</p>
+                <h2 class="text-2xl font-black text-gray-800 tracking-wide">eMarket POS</h2>
+                <p class="text-gray-500 text-xs mt-1 font-medium">Mở ca làm việc thu ngân</p>
             </div>
             
-            <form id="pinForm" class="space-y-6">
-                <div class="flex justify-center gap-2 sm:gap-3" id="pinContainer">
-                    <input type="password" class="pin-input w-10 h-12 sm:w-12 sm:h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" maxlength="1" inputmode="numeric" required autofocus>
-                    <input type="password" class="pin-input w-10 h-12 sm:w-12 sm:h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" maxlength="1" inputmode="numeric" required>
-                    <input type="password" class="pin-input w-10 h-12 sm:w-12 sm:h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" maxlength="1" inputmode="numeric" required>
-                    <input type="password" class="pin-input w-10 h-12 sm:w-12 sm:h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" maxlength="1" inputmode="numeric" required>
-                    <input type="password" class="pin-input w-10 h-12 sm:w-12 sm:h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" maxlength="1" inputmode="numeric" required>
-                    <input type="password" class="pin-input w-10 h-12 sm:w-12 sm:h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all" maxlength="1" inputmode="numeric" required>
+            <form id="loginForm" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Tên đăng nhập</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                        <input type="text" id="loginUsername" placeholder="NV001" required autofocus
+                            class="w-full pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Mật khẩu</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                        <input type="password" id="loginPassword" placeholder="••••••" required
+                            class="w-full pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition-all">
+                    </div>
                 </div>
                 
-                <p id="pinError" class="text-red-500 text-sm hidden font-medium flex items-center justify-center gap-1">
-                    <i data-lucide="alert-circle" class="w-4 h-4"></i> Mã PIN không chính xác
+                <p id="loginError" class="text-red-500 text-xs hidden font-semibold text-center flex items-center justify-center gap-1 pt-1">
+                    <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> <span>Sai thông tin đăng nhập</span>
                 </p>
                 
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 text-lg">
-                    <span>Đăng Nhập</span>
-                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 text-sm mt-2">
+                    <i data-lucide="log-in" class="w-4 h-4"></i>
+                    <span>ĐĂNG NHẬP</span>
                 </button>
             </form>
         </div>
@@ -92,7 +101,7 @@
 
             <div class="p-4 border-t border-indigo-800 text-sm flex flex-col gap-2">
                 <div class="flex items-center gap-2 text-indigo-200">
-                    <i data-lucide="user" class="w-4 h-4"></i> Thu ngân: <span class="font-bold text-white">Nguyễn Thế Anh</span>
+                    <i data-lucide="user" class="w-4 h-4"></i> Thu ngân: <span id="cashierNameDisplay" class="font-bold text-white">---</span>
                 </div>
                 <div class="flex items-center gap-2 text-indigo-200">
                     <i data-lucide="clock" class="w-4 h-4"></i> <span id="clock">--:--:--</span>
@@ -209,7 +218,7 @@
                             </div>
 
                             <button onclick="handleCheckout()" class="w-full bg-green-600 hover:bg-green-700 text-white text-xl font-bold py-4 rounded-lg shadow-lg flex justify-center items-center gap-2 transition-transform transform active:scale-95">
-                                <i data-lucide="printer" class="w-6 h-6"></i> HOÀN TẤT (Enter)
+                                <i data-lucide="printer" class="w-6 h-6"></i> HOÀN TẤT
                             </button>
                         </div>
                     </div>
@@ -339,7 +348,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Summary bar -->
+    
                     <div class="grid grid-cols-3 gap-4 p-4 bg-gray-50 border-b border-gray-200 shrink-0" id="historySummary">
                         <div class="bg-white rounded-lg p-3 border border-gray-100 shadow-sm text-center">
                             <div class="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-1">Giao dịch hiển thị</div>
@@ -403,10 +412,50 @@
                     <div class="w-full h-96 bg-gray-50 border border-gray-200 rounded-xl p-4">
                         <canvas id="revenueChart"></canvas>
                     </div>
+                    <div class="mt-8 border-t border-gray-200 pt-6">
+                        <h4 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4">
+                            <div class="bg-orange-100 p-2 rounded-lg">
+                                <i data-lucide="calculator" class="text-orange-600 w-6 h-6"></i>
+                            </div>
+                            Đối soát dòng tiền mặt tại két
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-600 mb-1">Quỹ đầu ca (VNĐ)</label>
+                                    <input type="number" id="startingCash" value="1000000" oninput="calculateReconciliation()" 
+                                        class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-600 mb-1">Tiền mặt thực đếm trong két (VNĐ)</label>
+                                    <input type="number" id="actualCash" placeholder="Nhập số tiền đếm được lúc chốt ca..." oninput="calculateReconciliation()" 
+                                        class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg transition-all">
+                                </div>
+                                <div class="pt-2 border-t border-gray-200 mt-4">
+                                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                        <span>Tổng tiền mặt thu trong ca:</span>
+                                        <span id="sysCashSales" class="font-bold text-gray-800">0 đ</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm text-gray-600">
+                                        <span>Tổng tiền QR/Chuyển khoản:</span>
+                                        <span id="sysQRSales" class="font-bold text-gray-800">0 đ</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-center text-center">
+                                <div class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Tiền mặt lý thuyết (Hệ thống)</div>
+                                <div class="text-3xl font-black text-indigo-700 mb-6" id="expectedCash">0 đ</div>
+                                
+                                <div class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Độ lệch quỹ</div>
+                                <div class="text-4xl font-black text-gray-300" id="cashDiscrepancy">0 đ</div>
+                                <div id="discrepancyWarning" class="mt-4 text-sm font-bold px-4 py-3 rounded-lg hidden flex items-center justify-center gap-2"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </main>
-        </div>
-    </div>
+
             <main id="view-members" class="tab-content hidden w-full h-full p-6 overflow-y-auto">
                 <div class="max-w-xl mx-auto">
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -445,10 +494,11 @@
                 </div>
             </main>
 
-            <!-- Giao diện tạo thẻ nhanh -->
+        </div>
+    </div>
+
     <div id="quickMemberModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-[140]">
         <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full relative transform scale-95 transition-transform duration-200" id="quickMemberContent">
-            <!-- Nút X góc trên bên phải -->
             <button onclick="closeQuickMemberModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
@@ -500,71 +550,66 @@
     <script>
         lucide.createIcons();
 
-        const pinInputs = document.querySelectorAll('.pin-input');
-        const pinForm = document.getElementById('pinForm');
         const loginScreen = document.getElementById('loginScreen');
         const posApp = document.getElementById('posApp');
-        const pinError = document.getElementById('pinError');
         let isLoggedIn = false;
 
-        pinInputs.forEach((input, index) => {
-            input.addEventListener('input', (e) => {
-                let val = e.target.value.replace(/[^0-9]/g, '');
-                if (val.length > 0) {
-                    e.target.value = val.slice(-1); 
-                    if (index < pinInputs.length - 1) {
-                        setTimeout(() => {
-                            pinInputs[index + 1].focus();
-                        }, 10);
-                    }
-                } else {
-                    e.target.value = '';
-                }
-                pinError.classList.add('hidden');
-            });
+        let currentCashier = null; 
 
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
-                    setTimeout(() => {
-                        pinInputs[index - 1].focus();
-                    }, 10);
-                }
-            });
-        });
+        const loginForm = document.getElementById('loginForm');
+        const loginError = document.getElementById('loginError');
 
-        pinForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            let pin = '';
-            pinInputs.forEach(input => pin += input.value);
-            
-            if (pin === '123456') {
-                loginScreen.classList.add('hidden');
-                posApp.classList.remove('hidden');
-                posApp.classList.add('flex');
-                isLoggedIn = true;
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
 
-                load7DaysHistory();
-                
-                setTimeout(() => {
-                    lucide.createIcons();
-                    document.getElementById('barcodeInput').focus();
-                }, 100);
-            } else {
-                pinError.classList.remove('hidden');
-                pinInputs.forEach(input => input.value = '');
-                pinInputs[0].focus();
+            try {
+                const res = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    currentCashier = result.data;
+                    isLoggedIn = true;
+
+                    document.getElementById('cashierNameDisplay').innerText = currentCashier.full_name;
+
+                    loginScreen.classList.add('hidden');
+                    posApp.classList.remove('hidden');
+                    posApp.classList.add('flex');
+
+                    load7DaysHistory();
+
+                    setTimeout(() => {
+                        lucide.createIcons();
+                        document.getElementById('barcodeInput').focus();
+                    }, 100);
+                } else {
+                    loginError.querySelector('span').innerText = result.message || 'Đăng nhập thất bại';
+                    loginError.classList.remove('hidden');
+                }
+            } catch (err) {
+                loginError.querySelector('span').innerText = 'Không thể kết nối đến máy chủ!';
+                loginError.classList.remove('hidden');
             }
         });
 
         const handleLogout = () => {
             isLoggedIn = false;
+            currentCashier = null;
             posApp.classList.add('hidden');
             posApp.classList.remove('flex');
             loginScreen.classList.remove('hidden');
-            pinInputs.forEach(input => input.value = '');
-            pinInputs[0].focus();
+            
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginError').classList.add('hidden');
             switchTab('view-pos'); 
-        }
+        };
 
         const POINT_VALUE = 100; 
         const POINT_EARN_RATE = 10000; 
@@ -687,7 +732,6 @@
                 const result = await response.json();
 
                 if (!result.success) {
-                    // THẺ CHƯA TỒN TẠI -> Mở giao diện nhập tên mới tạo
                     pendingMemberCode = code;
                     document.getElementById('quickMemberPhone').value = code;
                     document.getElementById('quickMemberNameInput').value = "";
@@ -703,7 +747,6 @@
                     }, 10);
 
                 } else {
-                    // THẺ ĐÃ TỒN TẠI -> Áp dụng ngay
                     const member = result.data;
                     currentMember = {
                         id: member.id,
@@ -719,7 +762,6 @@
             }
         };
 
-        // Đóng modal khi bấm nút X hoặc nút Hủy
         const closeQuickMemberModal = () => {
             const modal = document.getElementById('quickMemberModal');
             const content = document.getElementById('quickMemberContent');
@@ -731,7 +773,6 @@
             }, 150);
         };
 
-        // Xử lý khi bấm nút "Tạo thẻ" trên modal nhỏ
         const confirmCreateQuickMember = async () => {
             const nameVal = document.getElementById('quickMemberNameInput').value.trim();
             if (!nameVal) {
@@ -760,7 +801,6 @@
                     return showModal('Lỗi', createData.message || 'Không thể tạo thẻ mới.', true);
                 }
 
-                // Tạo xong thì gán luôn vào hóa đơn hiện tại
                 currentMember = {
                     id: code,
                     name: nameVal,
@@ -778,7 +818,6 @@
             }
         };
 
-        // Hàm phụ trợ cập nhật giao diện thông tin thẻ bên tay phải
         const updateMemberUI = () => {
             document.getElementById('memberInputSection').classList.add('hidden');
             document.getElementById('memberInfoSection').classList.remove('hidden');
@@ -810,7 +849,6 @@
                 
                 let pointsToUse = 0;
                 
-                // Chỉ sử dụng điểm nếu thành viên có từ 100 điểm trở lên
                 if (currentMember.points >= 100) {
                     let maxPointsForBill = Math.floor(tempTotal / POINT_VALUE);
                     pointsToUse = Math.min(currentMember.points, maxPointsForBill);
@@ -841,7 +879,6 @@
             if (paymentMethod === 'QR') {
                 if (currentFinalTotal > 0) {
                     document.getElementById('qrContainer').classList.remove('hidden');
-                    // Reset để buộc tạo lại mã QR mới khi tổng tiền thay đổi
                     lastQrAmount = -1;
                     generatePaymentQR();
                 } else {
@@ -851,7 +888,7 @@
                 }
             }
         };
-        
+
         const handleCheckout = async () => {
             if (cart.length === 0) return showModal('Trống', 'Vui lòng quét mặt hàng.', true);
             
@@ -942,7 +979,6 @@
                 payment: paymentMethod 
             };
 
-            // Gửi lệnh lưu xuống DB
             try {
                 await fetch('http://localhost:3000/api/orders', {
                     method: 'POST',
@@ -998,7 +1034,6 @@
             if (!code) return;
 
             try {
-                // Gửi yêu cầu tìm sản phẩm xuống Database
                 const response = await fetch(`http://localhost:3000/api/products/${code}`);
                 const result = await response.json();
 
@@ -1103,7 +1138,6 @@
             if (refundTotal === 0) return showModal('Lỗi', 'Vui lòng chọn sản phẩm trả.', true);
             
             try {
-                // - Bước 1: Gửi yêu cầu hoàn lại tồn kho cho từng sản phẩm
                 for (let index = 0; index < currentReturnOrder.items.length; index++) {
                     const item = currentReturnOrder.items[index];
                     const input = document.getElementById(`retQty_${index}`);
@@ -1121,7 +1155,6 @@
                             if (!response.ok) throw new Error(`Lỗi cập nhật kho: Mã ${response.status}`);
                             
                             item.returnedQty += qty; 
-                            // Cập nhật giao diện tạm thời
                             if (typeof dbProducts !== 'undefined' && dbProducts[item.id]) {
                                 dbProducts[item.id].stock += qty; 
                             }
@@ -1129,7 +1162,6 @@
                     }
                 }
 
-                // - Bước 2: Gửi yêu cầu thu hồi điểm (nếu là khách thành viên)
                 if (currentReturnOrder.memberId && revokedPoints > 0) {
                     const pointRes = await fetch('http://localhost:3000/api/members/revoke-points', {
                         method: 'POST',
@@ -1139,13 +1171,11 @@
                     
                     if (!pointRes.ok) throw new Error('Lỗi thu hồi điểm');
                     
-                    // Cập nhật biến tạm trên giao diện
                     if (typeof dbMembers !== 'undefined' && dbMembers[currentReturnOrder.memberId]) {
                         dbMembers[currentReturnOrder.memberId].points = Math.max(0, dbMembers[currentReturnOrder.memberId].points - revokedPoints);
                     }
                 }
 
-                // - Bước 3: Tạo mã hóa đơn và gửi yêu cầu lưu lịch sử
                 const returnInvoiceId = 'PTH' + Date.now().toString().slice(-6);
                 const returnTimeString = new Date().toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                 
@@ -1175,10 +1205,8 @@
 
                 if (!orderRes.ok) throw new Error('Lỗi lưu hóa đơn');
 
-                // - Lưu vào biến mảng để bảng lịch sử (Lịch sử HĐ) hiển thị ngay lập tức
                 sessionOrders.push(orderData);
                 
-                // - Hiển thị thông báo thành công và dọn dẹp giao diện
                 showModal('Thành Công', `Mã Phiếu Trả Hàng: ${returnInvoiceId}\nTiền hoàn lại: ${formatMoney(refundTotal)}\nThu hồi: ${revokedPoints} điểm.`);
                 
                 document.getElementById('returnInvoiceInput').value = '';
@@ -1215,7 +1243,6 @@
                 return true;
             });
 
-            // Update summary
             const sellTotal = filtered.filter(o => !o.isReturn).reduce((s, o) => s + o.total, 0);
             const retTotal = filtered.filter(o => o.isReturn).reduce((s, o) => s + o.total, 0);
             document.getElementById('hSumCount').innerText = filtered.length;
@@ -1235,7 +1262,6 @@
                     paymentBadge = `<span class="px-2 py-1 rounded text-xs font-semibold ${payColor}">${payText}</span>`;
                 }
 
-                // Build items detail rows
                 const itemsHtml = order.items ? order.items.map(it => `
                     <div class="flex justify-between items-center py-1 border-b border-gray-100 last:border-0">
                         <span class="text-xs text-gray-500 font-mono">${it.id}</span>
@@ -1322,6 +1348,7 @@
                     scales: { y: { beginAtZero: true, ticks: { callback: (val) => val >= 1000 ? (val / 1000) + 'k' : val } } }
                 }
             });
+            calculateReconciliation();
         };
 
         renderCart();
@@ -1412,12 +1439,10 @@
             const qrContainer = document.getElementById('qrContainer');
             if (method === 'QR' && currentFinalTotal > 0) {
                 qrContainer.classList.remove('hidden');
-                // Luôn tạo lại mã QR mới khi chuyển sang QR
                 lastQrAmount = -1;
                 generatePaymentQR();
             } else {
                 qrContainer.classList.add('hidden');
-                // Xóa mã QR cũ để tránh hiện lại lần sau
                 document.getElementById('qrcode').innerHTML = '';
                 lastQrAmount = -1;
             }
@@ -1439,15 +1464,10 @@
                 correctLevel : QRCode.CorrectLevel.H
             });
         };
-        // ==================== MEMBER MANAGEMENT ====================
-
 
         const createMember = async () => {
             const phone = document.getElementById('newMemberPhone').value.trim();
             const name  = document.getElementById('newMemberName').value.trim();
-            const rankSel = document.getElementById('newMemberRank');
-            const rankKey  = rankSel.value;
-            const rankInfo = RANK_MAP[rankKey] || RANK_MAP.member;
 
             if (!phone || phone.length < 9) return showModal('Thiếu thông tin', 'Vui lòng nhập số điện thoại hợp lệ (9-10 số).', true);
             if (!name)  return showModal('Thiếu thông tin', 'Vui lòng nhập họ và tên thành viên.', true);
@@ -1460,22 +1480,74 @@
                         id: phone,
                         name: name,
                         phone: phone,
-                        rank_name: rankInfo.label,
-                        discount_rate: rankInfo.rate,
+                        rank_name: 'Thành viên',
+                        discount_rate: 0,
                         points: 0
                     })
                 });
                 const result = await res.json();
                 if (!result.success) return showModal('Lỗi', result.message || 'Không thể tạo thẻ thành viên.', true);
 
-                showModal('Thành công', `Đã tạo thẻ thành viên!\nMã thẻ: ${phone}\nHọ tên: ${name}\nHạng: ${rankInfo.label}`);
+                showModal('Thành công', `Đã tạo thẻ thành viên!\nMã thẻ: ${phone}\nHọ tên: ${name}`);
                 document.getElementById('newMemberPhone').value = '';
                 document.getElementById('newMemberName').value = '';
-                document.getElementById('newMemberRank').value = 'member';
                 setTimeout(() => document.getElementById('newMemberPhone').focus(), 300);
             } catch (e) {
                 showModal('Lỗi kết nối', 'Không thể kết nối đến máy chủ.', true);
             }
+        };
+
+        const calculateReconciliation = () => {
+            const startingCash = parseInt(document.getElementById('startingCash').value) || 0;
+            const actualCashInput = document.getElementById('actualCash').value;
+            
+            let cashSales = 0;
+            let qrSales = 0;
+
+            sessionOrders.forEach(order => {
+                if (order.payment === 'CASH') {
+                    cashSales += order.total; 
+                } else if (order.payment === 'QR') {
+                    qrSales += order.total;
+                }
+            });
+
+            document.getElementById('sysCashSales').innerText = formatMoney(cashSales);
+            document.getElementById('sysQRSales').innerText = formatMoney(qrSales);
+
+            const expectedCash = startingCash + cashSales;
+            document.getElementById('expectedCash').innerText = formatMoney(expectedCash);
+
+            const discEl = document.getElementById('cashDiscrepancy');
+            const warningEl = document.getElementById('discrepancyWarning');
+
+            if (actualCashInput === '') {
+                discEl.innerText = '0 đ';
+                discEl.className = 'text-4xl font-black text-gray-300';
+                warningEl.classList.add('hidden');
+                return;
+            }
+
+            const actualCash = parseInt(actualCashInput) || 0;
+            const diff = actualCash - expectedCash;
+            
+            discEl.innerText = formatMoney(diff);
+            warningEl.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-yellow-100', 'text-yellow-700');
+
+            if (diff < 0) {
+                discEl.className = 'text-4xl font-black text-red-600';
+                warningEl.classList.add('bg-red-100', 'text-red-700');
+                warningEl.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i> Lệch thiếu ${formatMoney(Math.abs(diff))} tiền mặt. Yêu cầu giải trình!`;
+            } else if (diff > 0) {
+                discEl.className = 'text-4xl font-black text-yellow-600';
+                warningEl.classList.add('bg-yellow-100', 'text-yellow-700');
+                warningEl.innerHTML = `<i data-lucide="alert-circle" class="w-5 h-5"></i> Lệch thừa ${formatMoney(diff)} tiền mặt.`;
+            } else {
+                discEl.className = 'text-4xl font-black text-green-600';
+                warningEl.classList.add('bg-green-100', 'text-green-700');
+                warningEl.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> Khớp quỹ chính xác.`;
+            }
+            lucide.createIcons();
         };
 
         const load7DaysHistory = async () => {

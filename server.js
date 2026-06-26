@@ -78,17 +78,48 @@ app.post('/api/members/revoke-points', async (req, res) => {
 });
 
 app.post('/api/orders', async (req, res) => {
-    const { id, total, time, isReturn, memberId } = req.body;
+    const { id, total, time, isReturn, memberId, memberName, payment, items } = req.body;
     let connection;
     try {
         connection = await mysql.createConnection(dbConfig);
+        const itemsJson = typeof items === 'string' ? items : JSON.stringify(items || []);
+        
         await connection.execute(
-            'INSERT INTO orders (id, total, time, is_return, member_id) VALUES (?, ?, ?, ?, ?)',
-            [id, total, time, isReturn, memberId || null]
+            'INSERT INTO orders (id, total, time, is_return, member_id, member_name, payment, items, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())',
+            [id, total, time, isReturn, memberId || null, memberName || 'Khách vãng lai', payment || 'CASH', itemsJson]
         );
         res.json({ success: true, message: 'Lưu hóa đơn thành công' });
     } catch (error) {
+        console.error('Lỗi khi lưu hóa đơn:', error);
         res.status(500).json({ success: false, message: 'Lỗi server khi lưu hóa đơn' });
+    } finally {
+        if (connection) await connection.end();
+    }
+});
+
+app.get('/api/orders/history', async (req, res) => {
+    let connection;
+    try {
+        connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute(
+            'SELECT * FROM orders WHERE created_at >= NOW() - INTERVAL 7 DAY ORDER BY created_at ASC'
+        );
+        
+        const formattedOrders = rows.map(row => ({
+            id: row.id,
+            total: Number(row.total),
+            time: row.time,
+            isReturn: Boolean(row.is_return),
+            memberId: row.member_id,
+            memberName: row.member_name || 'Khách vãng lai',
+            payment: row.payment || 'CASH',
+            items: typeof row.items === 'string' ? JSON.parse(row.items) : (row.items || [])
+        }));
+
+        res.json({ success: true, data: formattedOrders });
+    } catch (error) {
+        console.error('Lỗi khi lấy lịch sử 7 ngày:', error);
+        res.status(500).json({ success: false, message: 'Lỗi máy chủ khi tải lịch sử' });
     } finally {
         if (connection) await connection.end();
     }

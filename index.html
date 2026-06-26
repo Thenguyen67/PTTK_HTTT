@@ -542,6 +542,8 @@
                 posApp.classList.remove('hidden');
                 posApp.classList.add('flex');
                 isLoggedIn = true;
+
+                load7DaysHistory();
                 
                 setTimeout(() => {
                     lucide.createIcons();
@@ -922,13 +924,29 @@
                 );
             }
 
-            sessionOrders.push({
-                id: invoiceId, total: currentFinalTotal, time: timeString, items: savedItems,
+            const newOrderData = {
+                id: invoiceId, 
+                total: currentFinalTotal, 
+                time: timeString, 
+                items: savedItems,
                 memberId: currentMember ? currentMember.id : null,
                 memberName: currentMember ? currentMember.name : "Khách vãng lai", 
                 isReturn: false,
                 payment: paymentMethod 
-            });
+            };
+
+            // Gửi lệnh lưu xuống DB
+            try {
+                await fetch('http://localhost:3000/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newOrderData)
+                });
+            } catch (err) {
+                console.error("Lỗi đồng bộ DB:", err);
+            }
+
+            sessionOrders.push(newOrderData);
             const paymentText = paymentMethod === 'CASH' ? 'Tiền mặt' : 'QR Code';
             showModal('Thành công', `Hóa đơn: ${invoiceId}\nTổng: ${formatMoney(currentFinalTotal)}\nThanh toán: ${paymentText}${pointMsg}`);
             
@@ -1124,12 +1142,22 @@
                 const returnInvoiceId = 'PTH' + Date.now().toString().slice(-6);
                 const returnTimeString = new Date().toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                 
+                const returnedItemsList = currentReturnOrder.items
+                    .map((item, idx) => {
+                        const qty = parseInt(document.getElementById(`retQty_${idx}`)?.value) || 0;
+                        return qty > 0 ? { ...item, qty: qty } : null;
+                    })
+                    .filter(Boolean);
+
                 const orderData = { 
                     id: returnInvoiceId, 
                     total: -refundTotal, 
                     time: returnTimeString, 
                     isReturn: true,
-                    memberId: currentReturnOrder.memberId
+                    memberId: currentReturnOrder.memberId,
+                    memberName: currentReturnOrder.memberName || "Khách vãng lai",
+                    payment: currentReturnOrder.payment || "CASH",
+                    items: returnedItemsList
                 };
 
                 const orderRes = await fetch('http://localhost:3000/api/orders', {
@@ -1406,12 +1434,6 @@
         };
         // ==================== MEMBER MANAGEMENT ====================
 
-        const RANK_MAP = {
-            member:   { label: 'Thành viên', rate: 0,    color: 'from-gray-400 to-gray-500' },
-            silver:   { label: 'Bạc',         rate: 0.03, color: 'from-gray-400 to-gray-300' },
-            gold:     { label: 'Vàng',         rate: 0.05, color: 'from-yellow-400 to-orange-500' },
-            platinum: { label: 'Bạch Kim',     rate: 0.10, color: 'from-indigo-400 to-purple-500' },
-        };
 
         const createMember = async () => {
             const phone = document.getElementById('newMemberPhone').value.trim();
@@ -1449,4 +1471,16 @@
             }
         };
 
+        const load7DaysHistory = async () => {
+            try {
+                const res = await fetch('http://localhost:3000/api/orders/history');
+                const result = await res.json();
+                if (result.success && Array.isArray(result.data)) {
+                    sessionOrders = result.data;
+                    renderHistoryData();
+                }
+            } catch (e) {
+                console.error("Không thể kết nối tải lịch sử 7 ngày:", e);
+            }
+        };
     </script>

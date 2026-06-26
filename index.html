@@ -80,7 +80,7 @@
                 </button>
                 <button onclick="switchTab('view-history')" id="tab-history" class="sidebar-tab w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-indigo-800 border-l-4 border-transparent transition-all font-medium text-left text-indigo-100">
                     <i data-lucide="clipboard-list" class="w-5 h-5"></i>
-                    <span class="flex-1">Lịch sử HĐ</span>
+                    <span class="flex-1">Lịch sử GD</span>
                     <span class="text-xs opacity-60">F4</span>
                 </button>
                 <button onclick="switchTab('view-report')" id="tab-report" class="sidebar-tab w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-indigo-800 border-l-4 border-transparent transition-all font-medium text-left text-indigo-100">
@@ -577,7 +577,6 @@
             if (!code) return;
 
             try {
-                // Gửi yêu cầu tìm khách hàng xuống Database
                 const response = await fetch(`http://localhost:3000/api/members/${code}`);
                 const result = await response.json();
 
@@ -587,7 +586,6 @@
 
                 const member = result.data;
                 
-                // Gán dữ liệu vào biến currentMember theo cấu trúc cũ để tính toán tiền
                 currentMember = {
                     id: member.id,
                     name: member.name,
@@ -654,7 +652,16 @@
             document.getElementById('finalTotal').innerText = formatMoney(currentFinalTotal);
 
             if (paymentMethod === 'QR') {
-                generatePaymentQR();
+                if (currentFinalTotal > 0) {
+                    document.getElementById('qrContainer').classList.remove('hidden');
+                    // Reset để buộc tạo lại mã QR mới khi tổng tiền thay đổi
+                    lastQrAmount = -1;
+                    generatePaymentQR();
+                } else {
+                    document.getElementById('qrContainer').classList.add('hidden');
+                    document.getElementById('qrcode').innerHTML = '';
+                    lastQrAmount = -1;
+                }
             }
         };
 
@@ -749,6 +756,7 @@
             
             cart = []; 
             lastQrAmount = -1;
+            document.getElementById('qrcode').innerHTML = '';
             removeMember(); 
             renderCart(); 
             setPayment('CASH');
@@ -1131,10 +1139,15 @@
             activeBtn.classList.add('border-indigo-500', 'bg-indigo-50', 'text-indigo-700');
 
             const qrContainer = document.getElementById('qrContainer');
-            if (currentFinalTotal > 0) {
+            if (method === 'QR' && currentFinalTotal > 0) {
                 qrContainer.classList.remove('hidden');
+                // Luôn tạo lại mã QR mới khi chuyển sang QR
+                lastQrAmount = -1;
+                generatePaymentQR();
             } else {
                 qrContainer.classList.add('hidden');
+                // Xóa mã QR cũ để tránh hiện lại lần sau
+                document.getElementById('qrcode').innerHTML = '';
                 lastQrAmount = -1;
             }
         };

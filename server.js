@@ -24,14 +24,12 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// --- ĐÃ SỬA LỖI 1: Thêm phản hồi res.json và bọc try...catch an toàn ---
 app.get('/api/products/:id', async (req, res) => {
     let connection;
     try {
         connection = await mysql.createConnection(dbConfig);
         const [rows] = await connection.execute('SELECT * FROM products WHERE id = ?', [req.params.id]);
         
-        // Kiểm tra xem sản phẩm có tồn tại trong Database không
         if (rows.length > 0) {
             res.json({ success: true, data: rows[0] });
         } else {
@@ -41,12 +39,10 @@ app.get('/api/products/:id', async (req, res) => {
         console.error('Lỗi khi lấy thông tin sản phẩm:', error);
         res.status(500).json({ success: false, message: 'Lỗi máy chủ nội bộ' });
     } finally {
-        // Luôn giải phóng và đóng kết nối Database
         if (connection) await connection.end();
     }
 });
 
-// --- API: Tăng tồn kho khi trả hàng ---
 app.post('/api/products/increase-stock', async (req, res) => {
     const { productId, quantity } = req.body;
     let connection;
@@ -64,7 +60,6 @@ app.post('/api/products/increase-stock', async (req, res) => {
     }
 });
 
-// --- API: Thu hồi điểm thưởng của thành viên ---
 app.post('/api/members/revoke-points', async (req, res) => {
     const { memberId, points } = req.body;
     let connection;
@@ -82,7 +77,6 @@ app.post('/api/members/revoke-points', async (req, res) => {
     }
 });
 
-// --- API: Lưu lịch sử hóa đơn trả hàng ---
 app.post('/api/orders', async (req, res) => {
     const { id, total, time, isReturn, memberId } = req.body;
     let connection;
@@ -100,7 +94,6 @@ app.post('/api/orders', async (req, res) => {
     }
 });
 
-// --- API: Giảm tồn kho khi khách mua hàng (Checkout) ---
 app.post('/api/products/decrease-stock', async (req, res) => {
     const { items } = req.body; 
     if (!items || !Array.isArray(items)) {
@@ -124,7 +117,6 @@ app.post('/api/products/decrease-stock', async (req, res) => {
     }
 });
 
-// --- API: Cập nhật điểm thành viên khi mua hàng ---
 app.post('/api/members/update-points', async (req, res) => {
     const { memberCode, pointsUsed, pointsEarned } = req.body;
     let connection;
@@ -167,7 +159,6 @@ app.get('/api/members/:id', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-// Bổ sung log báo hiệu trạng thái hoạt động của server
 app.listen(PORT, () => {
     console.log(`[SERVER] Máy chủ eMarket đang chạy tại: http://localhost:${PORT}`);
 });

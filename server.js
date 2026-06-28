@@ -93,11 +93,35 @@ app.post('/api/members/revoke-points', async (req, res) => {
     let connection;
     try {
         connection = await mysql.createConnection(dbConfig);
+        
+        // Thu hồi điểm ở cả 2 quỹ
         await connection.execute(
-            'UPDATE members SET points = GREATEST(0, points - ?) WHERE id = ?',
-            [points, memberId]
+            'UPDATE members SET points = GREATEST(0, points - ?), accumulated_points = GREATEST(0, accumulated_points - ?) WHERE id = ?',
+            [points, points, memberId]
         );
-        res.json({ success: true, message: 'Thu hồi điểm thành công' });
+        
+        // Kiểm tra xem sau khi thu hồi, khách có bị rớt hạng thẻ hay không
+        const [rows] = await connection.execute('SELECT accumulated_points FROM members WHERE id = ?', [memberId]);
+        if (rows.length > 0) {
+            const lifetimePoints = rows[0].accumulated_points;
+            let rankName = 'Thành viên';
+            let discountRate = 0.00;
+
+            if (lifetimePoints >= 900) {
+                rankName = 'Kim cương'; discountRate = 0.05;
+            } else if (lifetimePoints >= 400) {
+                rankName = 'Vàng'; discountRate = 0.03;
+            } else if (lifetimePoints >= 150) {
+                rankName = 'Bạc'; discountRate = 0.01;
+            }
+
+            await connection.execute(
+                'UPDATE members SET rank_name = ?, discount_rate = ? WHERE id = ?',
+                [rankName, discountRate, memberId]
+            );
+        }
+
+        res.json({ success: true, message: 'Thu hồi điểm và đối soát hạng thành công' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server khi trừ điểm' });
     } finally {
@@ -181,15 +205,42 @@ app.post('/api/members/update-points', async (req, res) => {
     let connection;
     try {
         connection = await mysql.createConnection(dbConfig);
+        
+        // Tiêu điểm thì chỉ trừ 'points'. Được thưởng điểm thì cộng vào CẢ 2 cột
         await connection.execute(
-            'UPDATE members SET points = points - ? + ? WHERE id = ?',
-            [pointsUsed || 0, pointsEarned || 0, memberCode]
+            'UPDATE members SET points = points - ? + ?, accumulated_points = accumulated_points + ? WHERE id = ?',
+            [pointsUsed || 0, pointsEarned || 0, pointsEarned || 0, memberCode]
         );
+        
+        // Đọc cột accumulated_points để xét thăng hạng
         const [rows] = await connection.execute(
-            'SELECT points FROM members WHERE id = ?', 
+            'SELECT points, accumulated_points FROM members WHERE id = ?', 
             [memberCode]
         );
-        res.json({ success: true, newTotalPoints: rows[0].points });
+        
+        const currentPoints = rows[0].points;
+        const lifetimePoints = rows[0].accumulated_points;
+
+        let rankName = 'Thành viên';
+        let discountRate = 0.00; 
+
+        if (lifetimePoints >= 900) {
+            rankName = 'Kim cương';
+            discountRate = 0.05; 
+        } else if (lifetimePoints >= 400) {
+            rankName = 'Vàng';
+            discountRate = 0.03; 
+        } else if (lifetimePoints >= 150) {
+            rankName = 'Bạc';
+            discountRate = 0.01; 
+        }
+
+        await connection.execute(
+            'UPDATE members SET rank_name = ?, discount_rate = ? WHERE id = ?',
+            [rankName, discountRate, memberCode]
+        );
+
+        res.json({ success: true, newTotalPoints: currentPoints });
     } catch (error) {
         console.error('Lỗi khi cập nhật điểm:', error);
         res.status(500).json({ success: false, message: 'Lỗi máy chủ khi tính điểm' });
@@ -239,14 +290,15 @@ app.post('/api/members/create', async (req, res) => {
     let connection;
     try {
         connection = await mysql.createConnection(dbConfig);
-        // Kiểm tra trùng
         const [existing] = await connection.execute('SELECT id FROM members WHERE id = ?', [id]);
         if (existing.length > 0) {
             return res.status(409).json({ success: false, message: `Thẻ thành viên với SDT "${id}" đã tồn tại.` });
         }
+        
+        const initPoints = points || 0;
         await connection.execute(
-            'INSERT INTO members (id, name, phone, rank_name, discount_rate, points, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
-            [id, name, phone || id, rank_name || 'Thành viên', discount_rate || 0, points || 0]
+            'INSERT INTO members (id, name, phone, rank_name, discount_rate, points, accumulated_points, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())',
+            [id, name, phone || id, rank_name || 'Thành viên', discount_rate || 0, initPoints, initPoints]
         );
         res.json({ success: true, message: 'Tạo thẻ thành viên thành công.' });
     } catch (error) {

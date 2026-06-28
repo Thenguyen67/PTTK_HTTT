@@ -224,7 +224,7 @@ app.post('/api/members/update-points', async (req, res) => {
         let rankName = 'Thành viên';
         let discountRate = 0.00; 
 
-        if (lifetimePoints >= 900) {
+        if (lifetimePoints >= 1000) {
             rankName = 'Kim cương';
             discountRate = 0.05; 
         } else if (lifetimePoints >= 400) {
